@@ -1,6 +1,6 @@
 # Feature Specification: Agenda PII Handling
 
-**Feature Branch**: `002-agenda-pii-handling`
+**Feature Branch**: `001-agenda-pii-handling`
 **Created**: 2025-12-20
 **Status**: Draft
 **Input**: User description: "We need to account for security and privacy. For example, one of th main requirements is that we will be use the weekly meeting agenda pdf which specifies key meeting roles such as who is the toasmaster, who is speaking, who is the tabletopics master, by partial name. We to not want to store that PII anywhere if we can avoid it and we do not want the information sent to an llm provider to be used for training"

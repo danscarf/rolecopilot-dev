@@ -1,6 +1,6 @@
 # Feature Specification: Smart Timer Module
 
-**Feature Branch**: `001-smart-timer-module`  
+**Feature Branch**: `002-smart-timer-module`  
 **Created**: 2025-12-20
 **Status**: Draft  
 **Input**: User description: "Smart Timer Module from tm-assistant-prd.md"
