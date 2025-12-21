@@ -1,28 +1,34 @@
 openapi: 3.0.0
 info:
   title: "RoleCopilot Agenda Processing API"
-  description: "API for processing meeting agenda PDFs to extract roles without storing PII."
-  version: "1.0.0"
+  description: "API for processing unstructured agenda text to extract roles without storing PII."
+  version: "1.1.0"
 
 paths:
   /api/process-agenda:
     post:
-      summary: "Upload and process an agenda PDF"
+      summary: "Process pasted agenda text"
       description: |
-        Accepts a PDF file of a meeting agenda, parses it on the server to extract roles and assignees,
-        and returns the data. All extracted PII (assignee names) is held in memory only for the
-        duration of the request and is not stored persistently.
+        Accepts a block of unstructured text/HTML, sanitizes it locally to remove PII,
+        sends the sanitized text to the Gemini AI for structuring, re-inserts the PII,
+        and returns the final structured JSON data.
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               type: object
               properties:
-                file:
+                text:
                   type: string
-                  format: binary
-                  description: "The meeting agenda PDF file to process."
+                  description: "The unstructured text or HTML of the meeting agenda."
+                  example: "Toastmaster: Jane Doe, Speaker: John Smith"
+                attendees:
+                  type: array
+                  items:
+                    type: string
+                  description: "A list of attendee names to help identify and sanitize PII."
+                  example: ["Jane Doe", "John Smith"]
       responses:
         "200":
           description: "Successful processing of the agenda."
@@ -33,13 +39,13 @@ paths:
                 items:
                   $ref: "#/components/schemas/AssignedRole"
         "400":
-          description: "Bad Request - No file uploaded, or the file is not a PDF."
+          description: "Bad Request - No text provided."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
         "500":
-          description: "Internal Server Error - Failed to parse the PDF."
+          description: "Internal Server Error - Failed to process the text with the AI service."
           content:
             application/json:
               schema:

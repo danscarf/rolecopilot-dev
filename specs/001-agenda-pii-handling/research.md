@@ -1,61 +1,69 @@
-# Research: Agenda PII Handling
+# Research: Agenda PII Handling (Text-to-JSON)
 
-This document records the research and decisions made to resolve ambiguities in the implementation plan.
+This document records the research and decisions made for the text-to-JSON implementation of the Agenda PII Handling feature.
 
-## 1. PDF Text Extraction in a Next.js Serverless Environment
+## 1. Prompt Engineering for Gemini Text-to-JSON Conversion
 
-**UNKNOWN**: The initial plan proposed `pdf-lib` for PDF parsing but marked for clarification its server-side compatibility and, crucially, its text extraction capabilities.
-
-**RESEARCH**:
-- `pdf-lib` is excellent for creating and modifying PDF documents. However, it does **not** have built-in functionality for text extraction. Its primary focus is on manipulating the PDF structure itself (adding pages, drawing shapes, embedding fonts/images), not on interpreting the content stream to extract text.
-- `pdf-parse`: A popular and robust library for Node.js that specializes in text extraction from PDF files. It's a wrapper around `pdf.js` by Mozilla. It runs smoothly in a Node.js environment, making it suitable for Next.js API routes (serverless functions).
-- `pdf.js`: The underlying engine for `pdf-parse`, maintained by Mozilla. It can be used directly, but `pdf-parse` provides a much simpler, promise-based API for the common use case of extracting all text content.
-
-**DECISION**: Use the `pdf-parse` library for extracting text from uploaded agenda PDFs.
-
-**RATIONALE**:
-- It is specifically designed for text extraction, which is the core requirement.
-- It has a straightforward API, reducing implementation complexity.
-- It is well-maintained and widely used in the Node.js ecosystem, ensuring good support and stability within our Next.js backend.
-- It handles the complexity of the PDF content stream internally, providing simple text output.
-
-**ALTERNATIVES CONSIDERED**:
-- **`pdf-lib`**: Rejected because it lacks text extraction capabilities.
-- **Using an external API/service**: Rejected as it introduces another third-party dependency and potential privacy concerns, which contradicts the feature's core security principles.
-- **`Tesseract.js` (OCR)**: Rejected because it's for Optical Character Recognition from images. The feature spec assumes text-based PDFs, making OCR unnecessary overhead and prone to inaccuracies.
-
-## 2. Secure API Key Management in Next.js
-
-**UNKNOWN**: How to securely manage the LLM API key for potential future use, ensuring it's not exposed to the client-side.
+**UNKNOWN**: What is the optimal prompt design for instructing a large language model like Gemini to reliably convert messy, unstructured text/HTML into a clean, predictable JSON array of assigned roles?
 
 **RESEARCH**:
-- Next.js supports environment variables that are only available on the server-side.
-- By prefixing an environment variable with `NEXT_PUBLIC_`, it becomes available in the browser. Without this prefix, it remains private to the server environment.
-- These variables can be stored in a `.env.local` file at the root of the project. This file is listed in `.gitignore` by default in Next.js projects and should never be committed to source control.
+-   **Few-Shot Learning**: Providing 2-3 examples of input text and the desired JSON output within the prompt dramatically improves accuracy and consistency. This is more effective than just describing the output format.
+-   **JSON Schema Enforcement**: Some models and APIs (like OpenAI's) have a "JSON mode" that forces the output to be valid JSON. For Gemini, while not a separate mode, you can explicitly ask for the output to conform to a specific JSON schema and even include the schema definition in the prompt.
+-   **System Instructions vs. User Prompts**: The prompt should contain clear system-level instructions that define the AI's role and the output format, followed by the user-provided (and sanitized) text.
+-   **Handling Variations**: The prompt should instruct the model on how to handle common variations, such as missing assignees (e.g., "If a role has no name assigned, use `null` for the `assignee` value").
 
-**DECISION**: The LLM API key will be stored in a `.env.local` file without the `NEXT_PUBLIC_` prefix (e.g., `LLM_API_KEY=...`).
+**DECISION**: The prompt sent to the Gemini API will be structured as follows:
+1.  **System Instruction**: A preamble defining the task, the desired JSON structure, and rules for handling missing data.
+2.  **Examples (Few-Shot)**: One or two concise examples of sanitized input text and the corresponding JSON output.
+3.  **User Input**: The sanitized, user-pasted text.
 
-**RATIONALE**:
-- This is the standard, secure method recommended by the Next.js documentation.
-- It ensures that the API key is never bundled with the client-side JavaScript, preventing it from being exposed to users.
-- The key can be accessed securely from within Next.js API routes (serverless functions) via `process.env.LLM_API_KEY`.
+**EXAMPLE PROMPT FRAGMENT**:
+```
+"You are an expert agenda parser. Your task is to extract meeting roles and their assignees from the provided text and format the output as a valid JSON array of objects. Each object must have a 'role' (string) and an 'assignee' (string or null).
 
-## 3. In-Memory Session Data Management in React
+---
+EXAMPLE 1
+Input: 'Toastmaster: [PERSON_1], Speaker: [PERSON_2]'
+Output: [{'role': 'Toastmaster', 'assignee': 'PERSON_1'}, {'role': 'Speaker', 'assignee': 'PERSON_2'}]
+---
+EXAMPLE 2
+Input: 'General Evaluator: , Timer: [PERSON_3]'
+Output: [{'role': 'General Evaluator', 'assignee': null}, {'role': 'Timer', 'assignee': 'PERSON_3'}]
+---
 
-**UNKNOWN**: Best practice for managing the temporary, in-memory session data (extracted roles and names) on the client-side.
+Process the following text:
+[SANITIZED_USER_TEXT_HERE]"
+```
+
+## 2. PII Sanitization and Tokenization Strategy
+
+**UNKNOWN**: What is the best strategy for sanitizing PII (names) from the input text locally before sending it to the AI, while ensuring the AI can still understand the structure and the client can re-insert the names later?
 
 **RESEARCH**:
-- **React State (`useState`)**: Suitable for managing state within a single component.
-- **React Context (`useContext` + `useState`)**: The standard, built-in solution for sharing state across multiple components without "prop drilling". A `SessionProvider` component can be created to hold the agenda data and make it available to any child component in the tree.
-- **Zustand**: A popular, lightweight state management library. It offers a simpler API than Context for some use cases and can help avoid re-renders.
+-   **Simple Find-and-Replace**: Using a pre-defined list of member names to find and replace them with tokens (e.g., `[PERSON_1]`, `[PERSON_2]`). This is fast and simple but requires a known list of members.
+-   **Named Entity Recognition (NER)**: More advanced, using a lightweight, client-side NLP library to identify person names automatically. This is more flexible but adds a dependency and complexity.
+-   **Re-insertion Mapping**: The sanitization process must create a map between the placeholder tokens and the original names. For example: `{'[PERSON_1]': 'Dan S.', '[PERSON_2]': 'Jane D.'}`. This map is held in the Next.js API route's memory and used to re-hydrate the data after receiving the structured JSON from Gemini.
 
-**DECISION**: Use React Context (`createContext`, `useContext`, `useState`).
+**DECISION**: Implement a find-and-replace tokenizer using a dynamic list of names.
+1.  The client will first identify potential names in the text (e.g., by looking for words near roles or using a simple heuristic). Alternatively, the user could be asked to provide a list of attendees.
+2.  This list of names will be sent to the Next.js API route along with the raw text.
+3.  The API route will perform the find-and-replace to create the sanitized text and the token-to-name map.
+4.  After the AI call, the route will use the map to replace the tokens in the final JSON before sending it to the client.
 
-**RATIONALE**:
-- It is a built-in React feature, requiring no additional third-party dependencies. This aligns with the principle of keeping the stack lean.
-- The scope of the session data is well-defined and a global provider at the root of the agenda-processing UI is a clean architectural pattern.
-- It's sufficient for the current scale of the feature. If state management becomes significantly more complex in the future, migrating to a library like Zustand would be straightforward.
+**RATIONALE**: This approach avoids adding a heavy client-side NER library and provides a reliable way to map sanitized data back to the original PII without ever exposing it to the third-party AI. It keeps the core PII-handling logic secure on the server-side within the API route.
 
-**ALTERNATIVES CONSIDERED**:
-- **Zustand**: A viable alternative, but overkill for the immediate need. Rejected in favor of using a native solution first.
-- **`sessionStorage`**: Rejected because it persists data across page reloads, which is not strictly "in-memory". While it's cleared when the tab is closed, React state that is lost on reload provides a cleaner and more explicit data lifecycle for this specific use case.
+## 3. Using `@google/generative-ai` in Next.js
+
+**UNKNOWN**: What are the best practices for using the `@google/generative-ai` package within a Next.js App Router API route?
+
+**RESEARCH**:
+-   **Initialization**: The `GoogleGenerativeAI` class should be initialized once and can be reused. It's best to do this outside the handler function in the `route.ts` file to take advantage of the serverless function's execution context for potential reuse across invocations.
+-   **API Key Management**: The API key must be stored as a server-side environment variable in `.env.local` (e.g., `GEMINI_API_KEY=...`) and accessed via `process.env.GEMINI_API_KEY`. It must not be exposed to the client.
+-   **Error Handling**: The API calls can fail due to network issues, invalid input, or safety blocks. The code must be wrapped in a `try...catch` block to handle these errors gracefully and return a meaningful error message to the client, as required by the spec (FR-009).
+-   **Streaming**: For long responses, streaming can improve perceived performance. For this use case, where the output is a relatively small JSON object, a standard non-streaming `generateContent` call is simpler and sufficient.
+
+**DECISION**: The `app/(api)/process-agenda/route.ts` file will:
+1.  Initialize a single `GoogleGenerativeAI` instance at the module level.
+2.  Read the API key from `process.env`.
+3.  Use the non-streaming `model.generateContent()` method inside a `try...catch` block.
+4.  Construct the prompt as detailed in section 1 of this research.

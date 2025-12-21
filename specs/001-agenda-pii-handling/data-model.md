@@ -22,7 +22,7 @@ Represents a single role extracted from the meeting agenda, along with the membe
 
 **State Transitions**:
 
-1.  **Initialization**: An array of `AssignedRole` objects is created by parsing the uploaded PDF in the `process-agenda` API route.
+1.  **Initialization**: An array of `AssignedRole` objects is created by the `process-agenda` API route after receiving the structured JSON from the Gemini AI and re-inserting the PII.
 2.  **Transmission**: The array is sent to the client as the API response.
 3.  **Client-side Hydration**: The data is loaded into the client's React state (e.g., in a Context provider).
 4.  **Termination**: The data is cleared from memory when the user session ends (e.g., component unmounts, tab is closed, or a "clear" action is dispatched).

@@ -3,6 +3,7 @@
 Auto-generated from all feature plans. Last updated: 2025-12-21
 
 ## Active Technologies
+- N/A for persistent PII. React state and context for in-memory session data. (001-agenda-pii-handling)
 
 - Node.js 20.x, TypeScript 5.x (001-agenda-pii-handling)
 
@@ -22,6 +23,7 @@ npm test && npm run lint
 Node.js 20.x, TypeScript 5.x: Follow standard conventions
 
 ## Recent Changes
+- 001-agenda-pii-handling: Added Node.js 20.x, TypeScript 5.x
 
 - 001-agenda-pii-handling: Added Node.js 20.x, TypeScript 5.x
 
