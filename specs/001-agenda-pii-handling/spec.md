@@ -11,7 +11,7 @@
 - Q: How should the system log its PII handling actions for monitoring and auditing, without logging the PII itself? → A: Log anonymized events
 - Q: Are there any specific data protection regulations (like GDPR or CCPA) that the system must adhere to? → A: No specific regulations initially.
 - Q: What is the expected behavior if the external LLM API call fails? → A: Gracefully inform user and revert to manual.
-- Q: What is the expected average and maximum size of the agenda PDFs, and the number of roles/members listed? → A: Typical toastmasters agendas are around 720 words.
+- Q: What is the expected average and maximum size of the agenda PDFs, and the number of roles/members listed? → A: Typical RoleCopilot meeting agendas are around 720 words.
 
 ## User Scenarios & Testing *(mandatory)*
 

@@ -10,7 +10,7 @@
 ### Session 2025-12-20
 - Q: How will the system log timer events for debugging and analytics without collecting PII? → A: Log anonymized timer events
 - Q: What should happen if a timer is left running for an exceptionally long time (e.g., over an hour)? → A: Stop timer and warn.
-- Q: What is the expected number of speakers (and therefore timer sessions) in a typical meeting? → A: Typical Toastmasters meetings have 10-15 speakers.
+- Q: What is the expected number of speakers (and therefore timer sessions) in a typical meeting? → A: Typical RoleCopilot meetings have 10-15 speakers.
 - Q: How should the system handle invalid user input for custom timer presets (e.g., yellow time before green time)? → A: Reject input and provide specific feedback.
 - Q: Should a history of past timer sessions be explicitly out of scope for this feature? → A: History is explicitly out of scope.
 
@@ -20,7 +20,7 @@
 
 As a meeting Timer, I want to accurately track and signal speaking times for different speech types without constantly looking at a timer, so that I can remain engaged with the speaker and the audience.
 
-**Why this priority**: This is the core functionality of the Timer role in Toastmasters. Failure to perform this task accurately disrupts the meeting flow and provides incorrect feedback to speakers.
+**Why this priority**: This is the core functionality of the Timer role in RoleCopilot. Failure to perform this task accurately disrupts the meeting flow and provides incorrect feedback to speakers.
 
 **Independent Test**: The timer can be set for a standard speech, started, and will correctly signal green, yellow, and red at the appropriate times. The final logged time is accurate.
 
@@ -42,7 +42,7 @@ As a meeting Timer, I want to accurately track and signal speaking times for dif
 
 ### Functional Requirements
 
-- **FR-001**: System MUST provide pre-defined timer presets for standard Toastmasters speeches (Icebreaker, Standard Speech, Table Topics, Evaluation).
+- **FR-001**: System MUST provide pre-defined timer presets for standard RoleCopilot speeches (Icebreaker, Standard Speech, Table Topics, Evaluation).
 - **FR-002**: System MUST allow users to define a custom timer with manual thresholds for green, yellow, and red signals.
 - **FR-003**: System MUST change the entire viewport background color to signal green, yellow, and red time milestones.
 - **FR-004**: System MUST provide haptic feedback (vibration) on the device when a time milestone is reached, if the device supports it.
@@ -75,7 +75,7 @@ As a meeting Timer, I want to accurately track and signal speaking times for dif
 
 - Haptic feedback is a progressive enhancement and may not be available on all devices. The core functionality of visual signals will always be present.
 - The application is intended for use in a single browser tab at a time. The behavior of running multiple timers in different tabs is undefined.
-- Typical Toastmasters meetings have 10-15 speakers, implying a similar number of timer sessions per meeting.
+- Typical RoleCopilot meetings have 10-15 speakers, implying a similar number of timer sessions per meeting.
 
 ## Out of Scope
 

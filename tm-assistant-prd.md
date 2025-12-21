@@ -1,12 +1,12 @@
-# Product Requirements Document: Toastmasters Digital Companion
+# Product Requirements Document: RoleCopilot Digital Companion
 
-**Project Name:** TM-Copilot (Working Title)
+**Project Name:** RoleCopilot (Working Title)
 **Version:** 0.1.0
 **Status:** Draft
 **Last Updated:** 2025-12-18
 
 ## 1. Executive Summary
-**Problem:** The administrative burden of Toastmasters meeting roles (Timer, Ah-Counter, Grammarian) creates high friction for members. Physical note-taking and manual calculation distract users from the primary goal of the meeting: active listening and public speaking practice.
+**Problem:** The administrative burden of RoleCopilot meeting roles (Timer, Ah-Counter, Grammarian) creates high friction for members. Physical note-taking and manual calculation distract users from the primary goal of the meeting: active listening and public speaking practice.
 
 **Solution:** A web application that acts as a "Heads-Up Display" (HUD). It minimizes cognitive load through large-touch interfaces, haptic feedback, and automated report generation, allowing the user to maintain eye contact with the speaker.
 
@@ -27,7 +27,7 @@
 **User Story:** As a Timer, I want to signal speaking times accurately without constantly checking my watch, so I can listen to the speech.
 
 * **FR-3.1.1: Time Presets**
-    * System must provide standard Toastmasters presets:
+    * System must provide standard RoleCopilot presets:
         * Icebreaker (4-6 mins)
         * Standard Speech (5-7 mins)
         * Table Topics (1-2 mins)

@@ -15,7 +15,7 @@ Sync Impact Report
 - Follow-up TODOs:
   - TODO(RATIFICATION_DATE): Confirm the ratification date. Using 2025-12-20 as a placeholder.
 -->
-# Toastmasters AI Companion Constitution
+# RoleCopilot Constitution
 
 ## Core Principles
 

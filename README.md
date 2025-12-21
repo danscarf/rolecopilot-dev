@@ -1,11 +1,11 @@
-# Toastmasters AI Companion
+# RoleCopilot AI Companion
 
 **Current Status:** Active Development (WIP)
 
 This project is an exploration into AI-assisted software development.
 
 ## The Goal
-As a remote Toastmaster, managing role-specific duties (like the **Ah-Counter** or **Grammarian**) usually involves juggling clunky spreadsheets while trying to pay attention to the speaker.
+As a remote meeting role holder, managing role-specific duties (like the **Ah-Counter** or **Grammarian**) usually involves juggling clunky spreadsheets while trying to pay attention to the speaker.
 
 This project aims to kill the spreadsheet by building a streamlined, purpose-built web interface for tracking meeting metrics, "Word of the Day" usage, and filler words.
 
