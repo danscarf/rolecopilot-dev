@@ -34,9 +34,8 @@ Thank you Mr./Madam Toastmaster."
   `;
 
   return (
-    <div className="p-4 bg-white dark:bg-gray-800 shadow rounded-lg space-y-4">
-      <h2 className="text-xl font-semibold text-black dark:text-white mb-4">Timer&apos;s Script</h2>
-      <pre className="whitespace-pre-wrap font-sans text-gray-700 dark:text-gray-300">
+    <div className="mt-4">
+      <pre className="whitespace-pre-wrap font-sans text-gray-700 dark:text-gray-300 leading-relaxed">
         {scriptText.trim()}
       </pre>
     </div>

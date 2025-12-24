@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Commenting out the headers function to test CSS loading issues.
+  /*
   async headers() {
     return [
       {
@@ -49,6 +51,7 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  */
   /* config options here */
 };
 

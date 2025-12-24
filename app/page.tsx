@@ -6,16 +6,25 @@ import Link from 'next/link'; // Import Link
 export default function Home() {
   return (
     <AgendaProvider>
-      <div className="flex flex-col items-center p-6 mt-4">
-        <div className="w-full max-w-2xl space-y-8">
-          <AgendaInput />
-          <RoleDisplay />
-
-          {/* New Navigation Link to Timer */}
-          <div className="mt-8 text-center">
-            <Link href="/timer" className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-              Go to Smart Timer
-            </Link>
+      <div className="flex flex-col items-center px-4 pt-32 pb-16 min-h-screen">
+        <div className="w-full max-w-4xl">
+          {/* Hero Section */}
+          <div className="mb-12 text-center">
+            <div className="inline-flex items-center gap-3 mb-4">
+              <span className="text-6xl">📋</span>
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+                Agenda Processor
+              </h1>
+            </div>
+            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              Parse meeting agendas and extract role assignments automatically with AI-powered intelligence
+            </p>
+          </div>
+          
+          {/* Main Content */}
+          <div className="space-y-8">
+            <AgendaInput />
+            <RoleDisplay />
           </div>
         </div>
       </div>

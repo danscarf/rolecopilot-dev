@@ -15,11 +15,7 @@ export function TimerReport() {
 
   // Group logged times by type
   const groupedTimes = loggedTimes.reduce((acc, session) => {
-    // Need to get the type from the preset used for the session
-    // For now, we'll assume the presetName directly corresponds to a type for grouping,
-    // or we might need to enhance TimerSession to store type directly.
-    // For simplicity, let's group by presetName and later refine if needed.
-    const groupKey = session.presetName; // Using presetName as groupKey for now
+    const groupKey = session.presetName;
 
     if (!acc[groupKey]) {
       acc[groupKey] = [];
@@ -30,39 +26,45 @@ export function TimerReport() {
 
   if (loggedTimes.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-        No timer sessions logged yet.
+      <div className="text-center py-8">
+        <div className="text-4xl mb-2">📭</div>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          No sessions logged yet
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="p-4 bg-white dark:bg-gray-800 shadow rounded-lg space-y-6">
-      <h2 className="text-xl font-semibold text-black dark:text-white mb-4">Timer's Report</h2>
-
+    <div className="space-y-4">
       {Object.entries(groupedTimes).map(([groupName, sessions]) => (
         <div key={groupName} className="space-y-2">
-          <h3 className="text-lg font-medium text-black dark:text-white border-b border-gray-200 dark:border-gray-700 pb-1">
+          <h3 className="text-sm font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wide">
             {groupName}
           </h3>
-          <ul className="divide-y divide-gray-100 dark:divide-gray-700">
+          <div className="space-y-2">
             {sessions.map((session) => (
-              <li key={session.id} className="py-2 flex justify-between items-center text-black dark:text-white">
+              <div 
+                key={session.id} 
+                className="flex justify-between items-center p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50"
+              >
                 <div>
-                  <p className="font-medium">{session.speakerName || 'Unnamed Speaker'}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Required: {session.timeRequirement}
+                  <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">
+                    {session.speakerName || 'Unnamed'}
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    Target: {session.timeRequirement}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium">{formatTime(session.duration)}</p>
-                  <p className={`text-sm ${session.isWithinTime ? 'text-green-600' : 'text-red-600'}`}>
-                    {session.isWithinTime ? 'Within Time' : <>Over/Under</>}
+                  <p className="font-bold text-gray-900 dark:text-gray-100">{formatTime(session.duration)}</p>
+                  <p className={`text-xs font-medium ${session.isWithinTime ? 'text-green-600' : 'text-red-600'}`}>
+                    {session.isWithinTime ? '✓ OK' : '✗ Off'}
                   </p>
                 </div>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       ))}
     </div>

@@ -1,10 +1,25 @@
 @import "tailwindcss";
 
-@theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@theme {
+  --font-family-sans: var(--font-inter);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+.gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.gradient-success {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
