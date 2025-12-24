@@ -42,7 +42,11 @@ As a meeting Timer, I want to accurately track and signal speaking times for dif
 
 ### Functional Requirements
 
-- **FR-001**: System MUST provide pre-defined timer presets for standard RoleCopilot speeches (Icebreaker, Standard Speech, Table Topics, Evaluation).
+- **FR-001**: System MUST provide pre-defined timer presets for standard RoleCopilot speeches, as defined in the official Timer Script:
+    - `Table Topics`: Green @ 1:00, Yellow @ 1:30, Red @ 2:00.
+    - `Ice Breaker`: Green @ 4:00, Yellow @ 5:00, Red @ 6:00.
+    - `Standard Speech (5-7 min)`: Green @ 5:00, Yellow @ 6:00, Red @ 7:00.
+    - `Evaluation (2-3 min)`: Green @ 2:00, Yellow @ 2:30, Red @ 3:00.
 - **FR-002**: System MUST allow users to define a custom timer with manual thresholds for green, yellow, and red signals.
 - **FR-003**: System MUST change the entire viewport background color to signal green, yellow, and red time milestones.
 - **FR-004**: System MUST provide haptic feedback (vibration) on the device when a time milestone is reached, if the device supports it.
@@ -55,11 +59,25 @@ As a meeting Timer, I want to accurately track and signal speaking times for dif
 - **FR-011**: System MUST log anonymized timer events (e.g., "timer_started", "timer_stopped", "preset_used") without any user-identifiable information for analytics and debugging.
 - **FR-012**: System MUST automatically stop any running timer after a predefined maximum duration (e.g., 2 hours) and provide a visual warning to the user.
 - **FR-013**: System MUST reject invalid custom timer presets (e.g., yellow time before green time) and provide specific, actionable feedback to the user.
+- **FR-014**: System MUST automatically determine and display if a logged time is "within time" based on the selected preset's grace period (30 seconds for speeches/evaluations, 15 seconds for Table Topics).
+- **FR-015**: System SHOULD provide a "Timer's Report" view that mimics the structure of the Timer Log PDF, grouping logged times by speech type.
+- **FR-016**: System SHOULD display the official Timer's script on the timer page for easy reference.
 
 ### Key Entities *(include if feature involves data)*
 
-- **Timer Preset**: Represents a pre-defined set of time milestones (green, yellow, red). (e.g., { name: "Standard Speech", green: 300, yellow: 360, red: 420 }).
-- **Timer Session**: Represents a single timed event, including the speaker's name and the final duration. (e.g., { speakerName: "John Doe", duration: 415 }).
+- **Timer Preset**: Represents a pre-defined set of time milestones.
+    - `name`: string (e.g., "Standard Speech")
+    - `type`: 'Speech', 'Evaluation', or 'Table Topics'
+    - `greenTime`: number (seconds)
+    - `yellowTime`: number (seconds)
+    - `redTime`: number (seconds)
+    - `gracePeriod`: { under: number, over: number } (seconds)
+- **Timer Session**: Represents a single timed event.
+    - `speakerName`: string | null
+    - `duration`: number (seconds)
+    - `presetName`: string
+    - `timeRequirement`: string (e.g., "5-7 min")
+    - `isWithinTime`: boolean
 
 ## Success Criteria *(mandatory)*
 

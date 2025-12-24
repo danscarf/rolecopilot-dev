@@ -21,6 +21,12 @@ const eslintConfig = defineConfig([
       "react/no-unescaped-entities": "off", // Disable for this file
     },
   },
+  { // NEW OVERRIDE
+    files: ["app/_components/timer/TimerReport.tsx"],
+    rules: {
+      "react/no-unescaped-entities": "off", // Disable for this file
+    },
+  },
 ]);
 
 export default eslintConfig;
