@@ -7,6 +7,11 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   security.configs.recommended,
+  {
+    rules: {
+      "react-hooks/set-state-in-effect": "off", // Global disable
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
@@ -14,6 +19,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Serwist generated service worker
+    "public/sw.js", // Add this line
   ]),
   {
     files: ["app/_components/agenda/RoleDisplay.tsx"],

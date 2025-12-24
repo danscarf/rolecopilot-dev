@@ -1,12 +1,4 @@
 import type { NextConfig } from "next";
-import withSerwist from "@serwist/next";
-
-const serwistConfig = withSerwist({
-  cacheOnNavigation: true, // Cache pages on navigation by default
-  disable: process.env.NODE_ENV === "development", // Disable in development
-  swSrc: "app/sw.ts", // Source file for the service worker
-  swDest: "public/sw.js", // Output service worker to public directory
-});
 
 const nextConfig: NextConfig = {
   async headers() {
@@ -60,4 +52,4 @@ const nextConfig: NextConfig = {
   /* config options here */
 };
 
-export default serwistConfig(nextConfig);
+export default nextConfig;

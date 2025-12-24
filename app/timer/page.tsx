@@ -15,7 +15,7 @@ function TimerPageContent() {
   const { selectedPreset } = useTimer();
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen">
+    <div className="flex flex-col md:flex-row min-h-screen pt-16">
       {/* Main Timer Display Area */}
       <div className="flex-grow flex flex-col items-center justify-center p-4">
         <TimerDisplay />
@@ -27,7 +27,6 @@ function TimerPageContent() {
 
       {/* Sidebar / Controls Area */}
       <div className="w-full md:w-1/3 p-4 bg-gray-100 dark:bg-gray-900 overflow-y-auto border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-700">
-        <h1 className="text-2xl font-bold mb-4 text-black dark:text-white">Smart Timer Controls</h1>
         <PresetSelector />
         {selectedPreset?.type === 'Custom' && (
           <div className="mt-4">

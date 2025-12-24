@@ -44,7 +44,7 @@ export function RoleDisplay() {
         {agendaData.map((item) => (
           <li key={item.id} className="py-2 flex justify-between items-center">
             <span className="font-medium text-gray-900 dark:text-gray-100">{item.role}:</span>
-            <span className={"text-gray-700 dark:text-gray-300"}>{item.assignee || <>Unassigned</>}</span>
+            <span className="text-gray-700 dark:text-gray-300">{item.assignee || 'Unassigned'}</span>
           </li>
         ))}
       </ul>
