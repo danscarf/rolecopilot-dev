@@ -1,6 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Turbopack config (Next.js 16+ default)
+  turbopack: {},
+  
+  // Suppress TypeORM webpack warnings about dynamic requires (for webpack mode)
+  webpack: (config) => {
+    config.ignoreWarnings = [
+      { module: /node_modules\/typeorm\/.*\.js/ },
+    ];
+    return config;
+  },
+  
   // Commenting out the headers function to test CSS loading issues.
   /*
   async headers() {
