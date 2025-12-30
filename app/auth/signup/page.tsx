@@ -1,9 +1,10 @@
 // app/auth/signup/page.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation'; // Import useRouter
 import { supabase } from '../../../app/_lib/supabase'; // Import supabase client
+import { useAuth } from '../../_providers/SupabaseAuthProvider';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -11,22 +12,58 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const router = useRouter(); // Initialize useRouter
+  const { session, isLoading } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!isLoading && session) {
+      console.log('User already logged in, redirecting to home...');
+      router.push('/');
+    }
+  }, [session, isLoading, router]);
+
+  // Show loading while checking auth status
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  // Don't show signup form if already logged in (while redirecting)
+  if (session) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="text-lg">Redirecting...</div>
+      </div>
+    );
+  }
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/login`,
+        },
+      });
 
-    if (error) {
-      setMessage(error.message);
-    } else {
-      setMessage('Sign-up successful! Check your email for verification.');
-      // router.push('/auth/login'); // Optionally redirect to login page
+      if (error) {
+        console.error('Supabase sign-up error:', error);
+        setMessage(error.message);
+      } else {
+        setMessage('Sign-up successful! Check your email for verification.');
+        // router.push('/auth/login'); // Optionally redirect to login page
+      }
+    } catch (err) {
+      console.error('Unexpected error during sign-up:', err);
+      setMessage('An unexpected error occurred. Check the console for details.');
     }
     setLoading(false);
   };

@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback, ReactNode } from 'react';
 import { logEvent } from '../_lib/analytics';
 import { useAuth } from './SupabaseAuthProvider'; // Import useAuth
-import { initializeDataSource, getTimerSessionRepository } from '../_lib/typeorm'; // Import TypeORM utilities
-import { TimerSession } from '../_lib/entities/TimerSession'; // Import the TypeORM entity (no alias)
+// TypeORM imports removed - database operations should be done via API routes, not client-side
+// import { initializeDataSource, getTimerSessionRepository } from '../_lib/typeorm';
+// import { TimerSession } from '../_lib/entities/TimerSession';
 
 // Define the shape of a Timer Preset
 export interface TimerPreset {
@@ -54,10 +55,10 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { user } = useAuth(); // Get authenticated user
 
-  // Initialize TypeORM Data Source
-  useEffect(() => {
-    initializeDataSource().catch(console.error);
-  }, []); // Run only once on mount
+  // TypeORM initialization removed - will be handled by API routes
+  // useEffect(() => {
+  //   initializeDataSource().catch(console.error);
+  // }, []);
 
   // Define functions using useCallback
   const stopTimer = useCallback(() => setIsRunning(false), []);
@@ -86,45 +87,43 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     setSelectedPreset(preset);
   }, []);
 
-  const logTime = useCallback(async (speakerName: string | null) => { // Made async
+  const logTime = useCallback(async (speakerName: string | null) => {
     if (selectedPreset && user?.id) { // Ensure user is logged in
       const isWithinTime = calculateIsWithinTime(elapsedTime, selectedPreset);
       
-      const newSessionEntity = new TimerSession(); // Instantiate the TypeORM entity
-      newSessionEntity.id = crypto.randomUUID(); // TypeORM will assign if PrimaryGeneratedColumn
-      newSessionEntity.speakerName = speakerName;
-      newSessionEntity.presetName = selectedPreset.name;
-      newSessionEntity.timeRequirement = formatTimeRequirement(selectedPreset);
-      newSessionEntity.duration = elapsedTime;
-      newSessionEntity.isWithinTime = isWithinTime;
-      newSessionEntity.timestamp = new Date();
-      newSessionEntity.userId = user.id;
+      // Create a new session object (local state only for now)
+      // TODO: Add API route to save to database
+      const newSession: LoggedTimerSession = {
+        id: crypto.randomUUID(),
+        speakerName: speakerName,
+        presetName: selectedPreset.name,
+        timeRequirement: formatTimeRequirement(selectedPreset),
+        duration: elapsedTime,
+        isWithinTime: isWithinTime,
+        timestamp: new Date(),
+        userId: user.id,
+      };
 
-      try {
-        const sessionRepository = getTimerSessionRepository();
-        const savedSession = await sessionRepository.save(newSessionEntity); // Save to database
-        setLoggedTimes(prev => [...prev, savedSession]); // Add saved session to state (will be TimerSession entity instance)
-      } catch (dbError) {
-        console.error("Failed to save timer session to database:", dbError);
-        // Fallback to local state if DB save fails, create a local LoggedTimerSession from entity
-        setLoggedTimes(prev => [...prev, {
-          id: newSessionEntity.id,
-          speakerName: newSessionEntity.speakerName,
-          presetName: newSessionEntity.presetName,
-          timeRequirement: newSessionEntity.timeRequirement,
-          duration: newSessionEntity.duration,
-          isWithinTime: newSessionEntity.isWithinTime,
-          timestamp: newSessionEntity.timestamp,
-          userId: newSessionEntity.userId,
-        }]);
-      }
+      // Save to local state
+      setLoggedTimes(prev => [...prev, newSession]);
+
+      // TODO: Optionally call an API route to persist to database
+      // try {
+      //   await fetch('/api/timer-sessions', {
+      //     method: 'POST',
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify(newSession),
+      //   });
+      // } catch (error) {
+      //   console.error('Failed to save to database:', error);
+      // }
       
       resetTimer(); // Reset after logging
     } else if (!user?.id) {
       console.warn("Cannot log time: User not authenticated.");
       // Optionally, show a message to the user
     }
-  }, [selectedPreset, elapsedTime, calculateIsWithinTime, formatTimeRequirement, resetTimer, user]); // Added user to dependencies
+  }, [selectedPreset, elapsedTime, calculateIsWithinTime, formatTimeRequirement, resetTimer, user]);
 
   // Timer logic
   useEffect(() => {

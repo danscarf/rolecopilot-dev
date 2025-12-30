@@ -1,9 +1,10 @@
 // app/auth/login/page.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation'; // Import useRouter
 import { supabase } from '../../../app/_lib/supabase'; // Import supabase client
+import { useAuth } from '../../_providers/SupabaseAuthProvider';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -11,22 +12,123 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const router = useRouter(); // Initialize useRouter
+  const { session, isLoading } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!isLoading && session) {
+      console.log('User already logged in, redirecting to home...');
+      router.push('/');
+    }
+  }, [session, isLoading, router]);
+
+  // Show loading while checking auth status
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  // Don't show login form if already logged in (while redirecting)
+  if (session) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div className="text-lg">Redirecting...</div>
+      </div>
+    );
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      console.log('Attempting login for:', email);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setMessage(error.message);
-    } else {
-      setMessage('Logged in successfully!');
-      router.push('/'); // Redirect to home page or dashboard
+      console.log('Login response:', { data, error });
+
+      if (error) {
+        console.error('Login error:', error);
+        setMessage(`Error: ${error.message}`);
+      } else if (data.session) {
+        console.log('Login successful! Session:', data.session);
+        setMessage('Logged in successfully!');
+        setTimeout(() => {
+          router.push('/'); // Redirect to home page or dashboard
+        }, 500);
+      } else {
+        setMessage('Login failed: No session returned');
+      }
+    } catch (err) {
+      console.error('Unexpected login error:', err);
+      setMessage(`Unexpected error: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    setLoading(false);
+  };
+
+  // Dev-only: Quick demo login
+  const handleDemoLogin = async () => {
+    const demoEmail = 'demo@rolecopilot.dev';
+    const demoPassword = 'demo123456';
+    
+    setLoading(true);
+    setMessage('Creating/logging into demo account...');
+
+    try {
+      console.log('Demo login: Attempting sign in...');
+      // Try to sign in first
+      let { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: demoPassword,
+      });
+
+      // If user doesn't exist, create it
+      if (signInError) {
+        console.log('Demo login: User does not exist, creating...', signInError.message);
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: demoEmail,
+          password: demoPassword,
+        });
+        
+        if (signUpError) {
+          console.error('Demo login: Sign up failed:', signUpError);
+          setMessage(`Demo signup failed: ${signUpError.message}`);
+          setLoading(false);
+          return;
+        }
+
+        console.log('Demo login: User created, signing in...', signUpData);
+        // Try signing in again after signup
+        const { data: retryData, error: retryError } = await supabase.auth.signInWithPassword({
+          email: demoEmail,
+          password: demoPassword,
+        });
+
+        if (retryError) {
+          console.error('Demo login: Retry sign in failed:', retryError);
+          setMessage(`Demo login failed: ${retryError.message}`);
+          setLoading(false);
+          return;
+        }
+
+        signInData = retryData;
+      }
+
+      console.log('Demo login: Success!', signInData);
+      setMessage('Demo login successful!');
+      setTimeout(() => {
+        router.push('/');
+      }, 500);
+    } catch (err) {
+      console.error('Demo login: Unexpected error:', err);
+      setMessage(`Unexpected error: ${err instanceof Error ? err.message : String(err)}`);
     }
     setLoading(false);
   };
@@ -68,8 +170,22 @@ export default function LoginPage() {
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
+        
+        {/* Dev-only: Quick demo login button */}
+        {process.env.NODE_ENV === 'development' && (
+          <button
+            type="button"
+            onClick={handleDemoLogin}
+            className="w-full py-2 px-4 border-2 border-yellow-500 rounded-md shadow-sm text-sm font-medium text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading}
+          >
+            🚀 Quick Demo Login (Dev Only)
+          </button>
+        )}
         {message && (
-          <p className="mt-4 text-center text-sm text-red-500">{message}</p>
+          <p className={`mt-4 text-center text-sm ${message.includes('successful') || message.includes('Success') ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+            {message}
+          </p>
         )}
         <div className="text-center text-sm">
           <p className="text-gray-600 dark:text-gray-400">

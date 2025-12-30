@@ -1,8 +1,39 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../_providers/SupabaseAuthProvider';
 import { AgendaProvider } from '../_providers/AgendaProvider';
 import { AgendaInput } from '../_components/agenda/AgendaInput';
 import { RoleDisplay } from '../_components/agenda/RoleDisplay';
 
 export default function AgendaPage() {
+  const router = useRouter();
+  const { session, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && !session) {
+      console.log('Not authenticated, redirecting to login...');
+      router.push('/auth/login?redirectedFrom=/agenda');
+    }
+  }, [session, isLoading, router]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-xl">Redirecting to login...</div>
+      </div>
+    );
+  }
+
   return (
     <AgendaProvider>
       <div className="flex flex-col items-center px-4 pt-32 pb-16 min-h-screen">

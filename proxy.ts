@@ -5,7 +5,12 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function proxy(req: NextRequest) {
-  const res = NextResponse.next();
+  let res = NextResponse.next({
+    request: {
+      headers: req.headers,
+    },
+  });
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -20,9 +25,19 @@ export async function proxy(req: NextRequest) {
             value,
             ...options,
           });
+          res.cookies.set({
+            name,
+            value,
+            ...options,
+          });
         },
         remove(name: string, options: CookieOptions) {
           req.cookies.set({
+            name,
+            value: '',
+            ...options,
+          });
+          res.cookies.set({
             name,
             value: '',
             ...options,
@@ -55,6 +70,6 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/agenda/:path*', '/timer/:path*', '/auth/:path*'], // Apply proxy to protected and auth routes
+  matcher: ['/auth/:path*'], // Only apply proxy to auth routes for now
 };
 
