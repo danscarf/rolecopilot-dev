@@ -17,16 +17,25 @@ export default function SignupPage() {
     setLoading(true);
     setMessage('');
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/login`,
+        },
+      });
 
-    if (error) {
-      setMessage(error.message);
-    } else {
-      setMessage('Sign-up successful! Check your email for verification.');
-      // router.push('/auth/login'); // Optionally redirect to login page
+      if (error) {
+        console.error('Supabase sign-up error:', error);
+        setMessage(error.message);
+      } else {
+        setMessage('Sign-up successful! Check your email for verification.');
+        // router.push('/auth/login'); // Optionally redirect to login page
+      }
+    } catch (err) {
+      console.error('Unexpected error during sign-up:', err);
+      setMessage('An unexpected error occurred. Check the console for details.');
     }
     setLoading(false);
   };
