@@ -15,15 +15,15 @@ export function AhhCounterControls() {
   };
 
   return (
-    <div className="p-4 border rounded-lg">
-      <h2 className="text-xl font-bold">Controls</h2>
-      <div className="grid grid-cols-3 gap-2 mt-2">
+    <div className="p-4 border rounded-lg bg-white dark:bg-gray-800 shadow-lg">
+      <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Controls for {selectedSpeaker ? selectedSpeaker.name : '...'}</h2>
+      <div className="grid grid-cols-3 gap-2 mt-4">
         {fillerWords.map(word => (
           <button
             key={word}
             onClick={() => handleLog(word)}
             disabled={!selectedSpeaker}
-            className="p-4 bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-purple-100 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 dark:text-gray-100"
           >
             {word}
           </button>
@@ -32,7 +32,7 @@ export function AhhCounterControls() {
       <button
         onClick={undoLastLog}
         disabled={!selectedSpeaker}
-        className="mt-4 p-2 bg-red-500 text-white rounded w-full disabled:opacity-50 disabled:cursor-not-allowed"
+        className="mt-4 p-2 bg-red-600 text-white rounded-lg w-full hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Undo Last
       </button>
