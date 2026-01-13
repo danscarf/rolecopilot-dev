@@ -40,6 +40,7 @@ This document breaks down the implementation of the "Ahh Counter" feature into a
 ## Phase 5: Polish
 - [ ] T011 Review and refine the UI for all new components.
 - [ ] T012 Add comments to any complex code sections.
+- [X] T013 Add a link to the "Ahh Counter" page in the main navigation bar (`Navbar.tsx`).
 
 ## Dependencies
 
