@@ -25,9 +25,9 @@ This document breaks down the implementation of the "Ahh Counter" feature into a
 **Independent Test**: After logging events, the user can see a report with correct totals for each speaker.
 
 - [X] T007 [US2] Create the `AhhCounterReport` component in `app/_components/ahh-counter/AhhCounterReport.tsx` to display the aggregated data from the provider.
-- [ ] T007.1 [US2] Implement logic in `AhhCounterReport.tsx` to access `session` data from `AhhCounterProvider`.
-- [ ] T007.2 [US2] Implement logic in `AhhCounterReport.tsx` to process `logEntries` and calculate total counts per speaker and filler word.
-- [ ] T007.3 [US2] Render aggregated data in `AhhCounterReport.tsx` as a formatted table or list.
+- [X] T007.1 [US2] Implement logic in `AhhCounterReport.tsx` to access `session` data from `AhhCounterProvider`.
+- [X] T007.2 [US2] Implement logic in `AhhCounterReport.tsx` to process `logEntries` and calculate total counts per speaker and filler word.
+- [X] T007.3 [US2] Render aggregated data in `AhhCounterReport.tsx` as a formatted table or list.
 - [X] T008 [US2] Integrate the `AhhCounterReport` component into `app/ahh-counter/page.tsx`.
 
 ## Phase 4: User Story 3 - View Role Script
