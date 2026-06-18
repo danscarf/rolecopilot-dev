@@ -9,12 +9,11 @@ const createJestConfig = nextJest({
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'jest-environment-jsdom',
+  moduleNameMapper: {
+    // Handle module aliases (if you have them in tsconfig.json)
+    '^@/(.*)$': '<rootDir>/app/$1',
+  },
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
-module.exports = createJestConfig(customJestConfig)$': 'identity-obj-proxy',
-  },
-  transform: {
-    '^.+\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
-  },
-};
+module.exports = createJestConfig(customJestConfig)

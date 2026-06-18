@@ -1,5 +1,7 @@
 // app/_providers/AhhCounterProvider.tsx
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+'use client';
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 // From data-model.md
 export interface Speaker {
@@ -31,13 +33,42 @@ interface AhhCounterContextType {
 
 const AhhCounterContext = createContext<AhhCounterContextType | undefined>(undefined);
 
+const STORAGE_KEY = 'ahh-counter-session';
+
 export const AhhCounterProvider = ({ children }: { children: ReactNode }) => {
-  const [session, setSession] = useState<AhhCounterSession>({
-    date: new Date(),
-    speakers: [],
-    logEntries: [],
+  const [session, setSession] = useState<AhhCounterSession>(() => {
+    // Try to load from localStorage on init
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          return {
+            ...parsed,
+            date: new Date(parsed.date),
+            logEntries: parsed.logEntries.map((e: any) => ({
+              ...e,
+              timestamp: new Date(e.timestamp)
+            }))
+          };
+        } catch (e) {
+          console.error('Failed to parse saved session', e);
+        }
+      }
+    }
+    return {
+      date: new Date(),
+      speakers: [],
+      logEntries: [],
+    };
   });
+
   const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
+
+  // Save to localStorage whenever session changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+  }, [session]);
 
   const addSpeaker = (name: string) => {
     const newSpeaker: Speaker = {
