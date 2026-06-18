@@ -1,9 +1,6 @@
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback, ReactNode } from 'react';
 import { logEvent } from '../_lib/analytics';
-import { useAuth } from './SupabaseAuthProvider'; // Import useAuth
-// TypeORM imports removed - database operations should be done via API routes, not client-side
-// import { initializeDataSource, getTimerSessionRepository } from '../_lib/typeorm';
-// import { TimerSession } from '../_lib/entities/TimerSession';
+import { useAuth } from './SupabaseAuthProvider';
 
 // Define the shape of a Timer Preset
 export interface TimerPreset {
@@ -15,25 +12,24 @@ export interface TimerPreset {
   gracePeriod: { under: number; over: number }; // seconds
 }
 
-// Define the shape of a Logged Timer Session (Frontend representation for state)
-export interface LoggedTimerSession { // Renamed from TimerSession
+// Define the shape of a Logged Timer Session
+export interface LoggedTimerSession {
   id: string;
   speakerName: string | null;
   presetName: string;
   timeRequirement: string; // e.g., "5-7 min"
   duration: number; // seconds
-  isWithinTime: boolean | null; // null until evaluated
+  isWithinTime: boolean | null;
   timestamp: Date;
-  userId?: string; // Optional for frontend, will be set on save
+  userId?: string;
 }
 
-// Define the shape of the Timer Context
 interface TimerContextType {
   isRunning: boolean;
-  elapsedTime: number; // seconds
+  elapsedTime: number;
   colorSignal: 'none' | 'green' | 'yellow' | 'red';
   selectedPreset: TimerPreset | null;
-  loggedTimes: LoggedTimerSession[]; // Use LoggedTimerSession
+  loggedTimes: LoggedTimerSession[];
   startTimer: () => void;
   stopTimer: () => void;
   resetTimer: () => void;
@@ -43,24 +39,36 @@ interface TimerContextType {
 
 const TimerContext = createContext<TimerContextType | undefined>(undefined);
 
-const MAX_TIMER_DURATION = 7200; // 2 hours in seconds
+const MAX_TIMER_DURATION = 7200;
+const STORAGE_KEY = 'timer-logged-times';
 
 export const TimerProvider = ({ children }: { children: ReactNode }) => {
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [colorSignal, setColorSignal] = useState<'none' | 'green' | 'yellow' | 'red'>('none');
   const [selectedPreset, setSelectedPreset] = useState<TimerPreset | null>(null);
-  const [loggedTimes, setLoggedTimes] = useState<LoggedTimerSession[]>([]); // Use LoggedTimerSession
+  
+  const [loggedTimes, setLoggedTimes] = useState<LoggedTimerSession[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          return JSON.parse(saved).map((t: any) => ({ ...t, timestamp: new Date(t.timestamp) }));
+        } catch (e) {
+          console.error('Failed to parse saved timer sessions', e);
+        }
+      }
+    }
+    return [];
+  });
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const { user } = useAuth(); // Get authenticated user
+  const { user } = useAuth();
 
-  // TypeORM initialization removed - will be handled by API routes
-  // useEffect(() => {
-  //   initializeDataSource().catch(console.error);
-  // }, []);
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(loggedTimes));
+  }, [loggedTimes]);
 
-  // Define functions using useCallback
   const stopTimer = useCallback(() => setIsRunning(false), []);
   const startTimer = useCallback(() => setIsRunning(true), []);
   
@@ -88,11 +96,9 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const logTime = useCallback(async (speakerName: string | null) => {
-    if (selectedPreset && user?.id) { // Ensure user is logged in
+    if (selectedPreset) {
       const isWithinTime = calculateIsWithinTime(elapsedTime, selectedPreset);
       
-      // Create a new session object (local state only for now)
-      // TODO: Add API route to save to database
       const newSession: LoggedTimerSession = {
         id: crypto.randomUUID(),
         speakerName: speakerName,
@@ -101,31 +107,14 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
         duration: elapsedTime,
         isWithinTime: isWithinTime,
         timestamp: new Date(),
-        userId: user.id,
+        userId: user?.id || 'local-user',
       };
 
-      // Save to local state
       setLoggedTimes(prev => [...prev, newSession]);
-
-      // TODO: Optionally call an API route to persist to database
-      // try {
-      //   await fetch('/api/timer-sessions', {
-      //     method: 'POST',
-      //     headers: { 'Content-Type': 'application/json' },
-      //     body: JSON.stringify(newSession),
-      //   });
-      // } catch (error) {
-      //   console.error('Failed to save to database:', error);
-      // }
-      
-      resetTimer(); // Reset after logging
-    } else if (!user?.id) {
-      console.warn("Cannot log time: User not authenticated.");
-      // Optionally, show a message to the user
+      resetTimer();
     }
   }, [selectedPreset, elapsedTime, calculateIsWithinTime, formatTimeRequirement, resetTimer, user]);
 
-  // Timer logic
   useEffect(() => {
     if (isRunning) {
       intervalRef.current = setInterval(() => {
@@ -135,51 +124,27 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [isRunning]);
 
-  // Auto-stop logic
   useEffect(() => {
     if (isRunning && elapsedTime >= MAX_TIMER_DURATION) {
       stopTimer();
-      logEvent('timer_auto_stopped', { duration: elapsedTime, reason: 'max_duration_exceeded' });
-      console.warn('Timer automatically stopped due to exceeding maximum duration.');
     }
   }, [isRunning, elapsedTime, stopTimer]);
 
-  // Update color signal based on elapsed time and selected preset
   useEffect(() => {
     if (selectedPreset) {
-      if (elapsedTime >= selectedPreset.redTime) {
-        setColorSignal('red');
-      } else if (elapsedTime >= selectedPreset.yellowTime) {
-        setColorSignal('yellow');
-      } else if (elapsedTime >= selectedPreset.greenTime) {
-        setColorSignal('green');
-      } else {
-        setColorSignal('none');
-      }
-    } else {
-      setColorSignal('none');
-    }
+      if (elapsedTime >= selectedPreset.redTime) setColorSignal('red');
+      else if (elapsedTime >= selectedPreset.yellowTime) setColorSignal('yellow');
+      else if (elapsedTime >= selectedPreset.greenTime) setColorSignal('green');
+      else setColorSignal('none');
+    } else setColorSignal('none');
   }, [elapsedTime, selectedPreset]);
   
   const value = {
-    isRunning,
-    elapsedTime,
-    colorSignal,
-    selectedPreset,
-    loggedTimes,
-    startTimer,
-    stopTimer,
-    resetTimer,
-    selectPreset,
-    logTime,
+    isRunning, elapsedTime, colorSignal, selectedPreset, loggedTimes,
+    startTimer, stopTimer, resetTimer, selectPreset, logTime,
   };
 
   return <TimerContext.Provider value={value}>{children}</TimerContext.Provider>;
@@ -187,8 +152,6 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
 
 export const useTimer = () => {
   const context = useContext(TimerContext);
-  if (context === undefined) {
-    throw new Error('useTimer must be used within a TimerProvider');
-  }
+  if (context === undefined) throw new Error('useTimer must be used within a TimerProvider');
   return context;
 };

@@ -45,6 +45,16 @@ export function Navbar() {
           >
             ⏱️ Timer
           </Link>
+          <Link
+            href="/ahh-counter"
+            className={`px-4 py-2 rounded-lg text-base font-medium transition-all ${
+              pathname === '/ahh-counter'
+                ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/50'
+                : 'text-gray-300 hover:text-white hover:bg-gray-800'
+            }`}
+          >
+            🎤 Ahh Counter
+          </Link>
 
           {!isLoading && (
             user ? (
