@@ -53,7 +53,7 @@ export const TopicsMasterProvider = ({ children }: { children: ReactNode }) => {
           return {
             ...parsed,
             date: new Date(parsed.date),
-            log: parsed.log.map((e: any) => ({
+            log: parsed.log.map((e: { timestamp: string; [key: string]: unknown }) => ({
               ...e,
               timestamp: new Date(e.timestamp),
             })),
