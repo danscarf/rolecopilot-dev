@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useTopicsMaster, Topic } from '../../_providers/TopicsMasterProvider';
+import { useTopicsMaster } from '../../_providers/TopicsMasterProvider';
 
 export function TopicsLog() {
   const { session, logSpeaker, removeLogEntry } = useTopicsMaster();
