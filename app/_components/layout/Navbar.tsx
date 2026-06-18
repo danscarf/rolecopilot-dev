@@ -55,6 +55,16 @@ export function Navbar() {
           >
             🎤 Ahh Counter
           </Link>
+          <Link
+            href="/topics-master"
+            className={`px-4 py-2 rounded-lg text-base font-medium transition-all ${
+              pathname === '/topics-master'
+                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/50'
+                : 'text-gray-300 hover:text-white hover:bg-gray-800'
+            }`}
+          >
+            🎯 Topics Master
+          </Link>
 
           {!isLoading && (
             user ? (
