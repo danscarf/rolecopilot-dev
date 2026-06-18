@@ -1,9 +1,7 @@
 // app/topics-master/page.tsx
 'use client';
 
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '../_providers/SupabaseAuthProvider';
+import React from 'react';
 import { TopicsMasterProvider, useTopicsMaster } from '../_providers/TopicsMasterProvider';
 import { TopicsSetup } from '../_components/topics-master/TopicsSetup';
 import { TopicsLog } from '../_components/topics-master/TopicsLog';
@@ -99,23 +97,6 @@ function TopicsMasterPageContent() {
 }
 
 export default function TopicsMasterPage() {
-  const router = useRouter();
-  const { session, isLoading } = useAuth();
-
-  useEffect(() => {
-    if (!isLoading && !session) {
-      router.push('/auth/login?redirectedFrom=/topics-master');
-    }
-  }, [session, isLoading, router]);
-
-  if (isLoading) {
-    return <div className="flex items-center justify-center min-h-screen"><div className="text-xl">Loading...</div></div>;
-  }
-
-  if (!session) {
-    return <div className="flex items-center justify-center min-h-screen"><div className="text-xl">Redirecting to login...</div></div>;
-  }
-
   return (
     <TopicsMasterProvider>
       <TopicsMasterPageContent />
