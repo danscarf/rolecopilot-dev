@@ -1,16 +1,22 @@
-// app/_components/ahh-counter/SpeakerList.tsx
 'use client';
 
 import React, { useState } from 'react';
-import { useAhhCounter } from '../../_providers/AhhCounterProvider';
+import type { Speaker } from '../../_providers/AhhCounterProvider';
 
-export function SpeakerList() {
-  const { session, addSpeaker, selectedSpeaker, selectSpeaker } = useAhhCounter();
+interface SpeakerListProps {
+  speakers: Speaker[];
+  selectedSpeaker: Speaker | null;
+  onAdd: (name: string) => void;
+  onSelect: (speaker: Speaker | null) => void;
+}
+
+export function SpeakerList({ speakers, selectedSpeaker, onAdd, onSelect }: SpeakerListProps) {
   const [newSpeakerName, setNewSpeakerName] = useState('');
 
   const handleAddSpeaker = () => {
-    if (newSpeakerName.trim()) {
-      addSpeaker(newSpeakerName.trim());
+    const trimmed = newSpeakerName.trim();
+    if (trimmed) {
+      onAdd(trimmed);
       setNewSpeakerName('');
     }
   };
@@ -23,6 +29,9 @@ export function SpeakerList() {
           type="text"
           value={newSpeakerName}
           onChange={(e) => setNewSpeakerName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleAddSpeaker();
+          }}
           placeholder="New speaker name"
           className="flex-grow p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
         />
@@ -31,10 +40,10 @@ export function SpeakerList() {
         </button>
       </div>
       <ul className="space-y-2">
-        {session.speakers.map((speaker) => (
+        {speakers.map((speaker) => (
           <li
             key={speaker.id}
-            onClick={() => selectSpeaker(speaker)}
+            onClick={() => onSelect(speaker)}
             className={`p-3 rounded-lg cursor-pointer transition-colors ${
               selectedSpeaker?.id === speaker.id
                 ? 'bg-purple-600 text-white shadow-md'

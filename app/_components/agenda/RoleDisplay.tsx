@@ -58,18 +58,18 @@ export function RoleDisplay() {
       
       <div className="space-y-3 mb-8">
         {agendaData.map((item, index) => (
-          <div 
-            key={item.id} 
-            className="flex justify-between items-center p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-700 dark:to-gray-800 border border-purple-100 dark:border-gray-600 hover:shadow-md transition-shadow"
+          <div
+            key={item.id}
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-700 dark:to-gray-800 border border-purple-100 dark:border-gray-600 hover:shadow-md transition-shadow"
             style={{ animationDelay: `${index * 50}ms` }}
           >
-            <div className="flex items-center gap-3">
-              <span className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center text-sm font-bold">
+            <div className="flex items-start gap-3 min-w-0 flex-1">
+              <span className="shrink-0 w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center text-sm font-bold">
                 {index + 1}
               </span>
-              <span className="font-bold text-gray-900 dark:text-gray-100">{item.role}</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100 break-words min-w-0">{item.role}</span>
             </div>
-            <span className="px-4 py-2 rounded-lg bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 font-medium shadow-sm">
+            <span className="px-4 py-2 rounded-lg bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 font-medium shadow-sm break-words min-w-0 sm:max-w-[50%] sm:text-right">
               {item.assignee || '❓ Unassigned'}
             </span>
           </div>
