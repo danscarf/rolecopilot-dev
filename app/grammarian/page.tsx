@@ -6,10 +6,18 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../_providers/SupabaseAuthProvider';
 import { GrammarianProvider, useGrammarian } from '../_providers/GrammarianProvider';
 import { SpeakerList } from '../_components/shared/SpeakerList';
+import { ImproperUsage } from '../_components/grammarian/ImproperUsage';
+import { OutstandingLanguage } from '../_components/grammarian/OutstandingLanguage';
+import { WordOfTheDay } from '../_components/grammarian/WordOfTheDay';
+import { GrammarianReport } from '../_components/grammarian/GrammarianReport';
+import { GrammarianScript } from '../_components/grammarian/GrammarianScript';
 
 function GrammarianPageContent() {
-  const { session, selectedSpeaker, addSpeaker, selectSpeaker } = useGrammarian();
+  const { session, selectedSpeaker, addSpeaker, selectSpeaker, undoLastObservation, resetSession } = useGrammarian();
   const [showScript, setShowScript] = useState(false);
+
+  const observationCount =
+    session.improperUsages.length + session.outstandingLanguage.length + session.wotdUsages.length;
 
   return (
     <div className="min-h-screen pt-24 pb-12 px-4">
@@ -27,10 +35,32 @@ function GrammarianPageContent() {
           </p>
         </div>
 
+        {/* Session controls */}
+        <div className="mb-6 flex flex-wrap items-center justify-end gap-2">
+          <button
+            onClick={undoLastObservation}
+            disabled={observationCount === 0}
+            className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            ↶ Undo last observation
+          </button>
+          <button
+            onClick={() => {
+              if (confirm('Start a new session? All current observations and speakers will be cleared.')) {
+                resetSession();
+              }
+            }}
+            className="px-4 py-2 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 border border-red-300 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+          >
+            Start New Session
+          </button>
+        </div>
+
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6 h-full">
+          {/* Left column: Speakers */}
+          <div className="lg:col-span-1 space-y-6">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6">
               <SpeakerList
                 speakers={session.speakers}
                 selectedSpeaker={selectedSpeaker}
@@ -38,14 +68,31 @@ function GrammarianPageContent() {
                 onSelect={selectSpeaker}
               />
             </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6">
+              <WordOfTheDay />
+            </div>
           </div>
 
+          {/* Right column: Observations + Report + Script */}
           <div className="lg:col-span-2 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6">
+                <ImproperUsage />
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6">
+                <OutstandingLanguage />
+              </div>
+            </div>
+
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Observations</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Improper usage, outstanding language, and Word of the Day tracking will appear here.
-              </p>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-2xl">📋</span>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                  Grammarian&apos;s Report
+                </h2>
+              </div>
+              <GrammarianReport />
             </div>
 
             {/* Collapsible Script Section */}
@@ -78,9 +125,7 @@ function GrammarianPageContent() {
               </button>
               {showScript && (
                 <div className="px-6 pb-6 border-t border-gray-100 dark:border-gray-700">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
-                    Script content coming in a later task.
-                  </p>
+                  <GrammarianScript />
                 </div>
               )}
             </div>
