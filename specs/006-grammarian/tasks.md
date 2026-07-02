@@ -3,10 +3,10 @@
 This document breaks down the implementation of the "Grammarian" feature into actionable tasks.
 
 ## Phase 1: Foundational Setup
-- [ ] T001 Create `app/grammarian/` directory and a basic `page.tsx` for the feature.
-- [ ] T002 Create `app/_components/grammarian/` directory for the feature's components.
-- [ ] T003 Implement the `GrammarianProvider` in `app/_providers/GrammarianProvider.tsx` to manage state.
-- [ ] T004 Create a reusable `SpeakerList` component (or adapt the one from Ahh Counter) in `app/_components/shared/SpeakerList.tsx`.
+- [x] T001 Create `app/grammarian/` directory and a basic `page.tsx` for the feature.
+- [ ] T002 Create `app/_components/grammarian/` directory for the feature's components. (deferred to T005)
+- [x] T003 Implement the `GrammarianProvider` in `app/_providers/GrammarianProvider.tsx` to manage state.
+- [x] T004 Create a reusable `SpeakerList` component (or adapt the one from Ahh Counter) in `app/_components/shared/SpeakerList.tsx`.
 
 ## Phase 2: User Story 1 - Record Language Observations
 **Goal**: Allow the user to record observations about speaker language usage.
