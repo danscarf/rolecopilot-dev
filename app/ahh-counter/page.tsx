@@ -2,14 +2,15 @@
 'use client';
 
 import React from 'react';
-import { AhhCounterProvider } from '../_providers/AhhCounterProvider';
-import { SpeakerList } from '../_components/ahh-counter/SpeakerList';
+import { AhhCounterProvider, useAhhCounter } from '../_providers/AhhCounterProvider';
+import { SpeakerList } from '../_components/shared/SpeakerList';
 import { AhhCounterControls } from '../_components/ahh-counter/AhhCounterControls';
 import { AhhCounterReport } from '../_components/ahh-counter/AhhCounterReport';
 import { AhhCounterScript } from '../_components/ahh-counter/AhhCounterScript';
 
 function AhhCounterPageContent() {
     const [showScript, setShowScript] = React.useState(false);
+    const { session, selectedSpeaker, addSpeaker, selectSpeaker } = useAhhCounter();
 
     return (
         <div className="min-h-screen pt-24 pb-12 px-4">
@@ -31,14 +32,19 @@ function AhhCounterPageContent() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-1">
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6 h-full">
-                            <SpeakerList />
+                            <SpeakerList
+                                speakers={session.speakers}
+                                selectedSpeaker={selectedSpeaker}
+                                onAdd={addSpeaker}
+                                onSelect={selectSpeaker}
+                            />
                         </div>
                     </div>
                     <div className="lg:col-span-2 space-y-6">
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6">
                             <AhhCounterControls />
                         </div>
-                        
+
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6">
                             <AhhCounterReport />
                         </div>

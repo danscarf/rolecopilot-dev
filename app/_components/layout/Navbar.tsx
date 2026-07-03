@@ -32,6 +32,7 @@ export function Navbar() {
           {navLink('/agenda', '📋 Agenda')}
           {navLink('/timer', '⏱️ Timer')}
           {navLink('/ahh-counter', '🎤 Ahh Counter')}
+          {navLink('/grammarian', '📖 Grammarian')}
           {navLink('/topics-master', '🎯 Topics Master', 'bg-emerald-600 shadow-emerald-500/50')}
         </div>
       </div>

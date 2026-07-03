@@ -35,6 +35,8 @@ interface TimerContextType {
   resetTimer: () => void;
   selectPreset: (preset: TimerPreset | null) => void;
   logTime: (speakerName: string | null) => void;
+  removeLoggedTime: (id: string) => void;
+  clearLoggedTimes: () => void;
 }
 
 const TimerContext = createContext<TimerContextType | undefined>(undefined);
@@ -115,6 +117,14 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [selectedPreset, elapsedTime, calculateIsWithinTime, formatTimeRequirement, resetTimer, user]);
 
+  const removeLoggedTime = useCallback((id: string) => {
+    setLoggedTimes(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  const clearLoggedTimes = useCallback(() => {
+    setLoggedTimes([]);
+  }, []);
+
   useEffect(() => {
     if (isRunning) {
       intervalRef.current = setInterval(() => {
@@ -145,6 +155,7 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
   const value = {
     isRunning, elapsedTime, colorSignal, selectedPreset, loggedTimes,
     startTimer, stopTimer, resetTimer, selectPreset, logTime,
+    removeLoggedTime, clearLoggedTimes,
   };
 
   return <TimerContext.Provider value={value}>{children}</TimerContext.Provider>;
