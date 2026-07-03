@@ -9,7 +9,7 @@
 - Results presentation: role-style panels on screen **and** a downloadable report.
 - Capture: record audio in the browser and send the audio to AI for transcription + analysis (browser speech APIs strip disfluencies like "um/uh", which would defeat filler-word counting).
 - Mock interview mode is in scope for v1, in this same spec.
-- The downloadable report MUST respect and utilize Toastmasters branding assets and guidelines as documented in `02330-001-0001-brand-manual.pdf` (Brand Manual v2.0, Rev. 07/2026 — copied to the repo root; note the repo's `.gitignore` currently excludes `*.pdf`).
+- The downloadable report MUST respect and utilize Toastmasters branding assets and guidelines as documented in `02330-001-0001-brand-manual.pdf` (Brand Manual v2.0, Rev. 07/2026). A copy lives at the repo root but is intentionally not committed (`.gitignore` excludes `*.pdf`). To obtain it: direct download at <https://content.toastmasters.org/image/upload/02330-001-0001-brand-manual.pdf>, or — for the latest revision — log in and get it from the Toastmasters Brand Portal at <https://www.toastmasters.org/resources/brand-portal> (the canonical breadcrumb if the direct link goes stale).
 - Access: login required; no per-user usage quotas in v1.
 
 ## User Scenarios & Testing *(mandatory)*
@@ -43,7 +43,7 @@ As a user who just completed a practice session, I want to download or print a s
 **Acceptance Scenarios**:
 
 1. **Given** results are displayed, **When** I choose "Download report", **Then** I receive a printable document containing the session date, speech type, all analysis dimensions, the overall score, and the strengths/improvement suggestions.
-2. **Given** the report is rendered, **Then** it complies with the Toastmasters Brand Manual (`02330-001-0001-brand-manual.pdf`):
+2. **Given** the report is rendered, **Then** it complies with the Toastmasters Brand Manual (`02330-001-0001-brand-manual.pdf` — see Clarifications for where to obtain it):
    - **Colors**: only the brand palette — Loyal Blue `#004165` and True Maroon `#772432` (headers/backgrounds), Cool Gray `#A9B2B1` (backgrounds), Happy Yellow `#F2DF74` (accents/highlights only), plus black/white; gradients only per the manual (e.g., Loyal Blue `#004165` → Blissful Blue `#006094`).
    - **Typography**: Gotham for headlines/subheads and Myriad Pro for body copy, or their manual-sanctioned free alternates (Montserrat and Source Sans 3; Arial/Segoe UI acceptable tertiary body fonts).
    - **Logo**: the official Toastmasters International logo, unmodified (full-color, grayscale, or white variant only), minimum size 72px digital / 0.75in print, clear space at least equal to the wordmark height, no copy/symbols/effects overlapping it, and no custom club logo or tagline.
