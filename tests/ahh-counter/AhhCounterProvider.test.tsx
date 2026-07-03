@@ -3,6 +3,10 @@ import { renderHook, act } from '@testing-library/react';
 import { AhhCounterProvider, useAhhCounter } from '../../app/_providers/AhhCounterProvider';
 
 describe('AhhCounterProvider', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   it('should add a speaker', () => {
     const { result } = renderHook(() => useAhhCounter(), {
       wrapper: AhhCounterProvider,

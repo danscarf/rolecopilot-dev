@@ -1,9 +1,7 @@
 // app/grammarian/page.tsx
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '../_providers/SupabaseAuthProvider';
+import React, { useState } from 'react';
 import { GrammarianProvider, useGrammarian } from '../_providers/GrammarianProvider';
 import { SpeakerList } from '../_components/shared/SpeakerList';
 import { ImproperUsage } from '../_components/grammarian/ImproperUsage';
@@ -137,31 +135,6 @@ function GrammarianPageContent() {
 }
 
 export default function GrammarianPage() {
-  const router = useRouter();
-  const { session, isLoading } = useAuth();
-
-  useEffect(() => {
-    if (!isLoading && !session) {
-      router.push('/auth/login?redirectedFrom=/grammarian');
-    }
-  }, [session, isLoading, router]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl">Redirecting to login...</div>
-      </div>
-    );
-  }
-
   return (
     <GrammarianProvider>
       <GrammarianPageContent />

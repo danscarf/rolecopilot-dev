@@ -1,9 +1,7 @@
 // app/ahh-counter/page.tsx
 'use client';
 
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '../_providers/SupabaseAuthProvider';
+import React from 'react';
 import { AhhCounterProvider, useAhhCounter } from '../_providers/AhhCounterProvider';
 import { SpeakerList } from '../_components/shared/SpeakerList';
 import { AhhCounterControls } from '../_components/ahh-counter/AhhCounterControls';
@@ -46,7 +44,7 @@ function AhhCounterPageContent() {
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6">
                             <AhhCounterControls />
                         </div>
-                        
+
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6">
                             <AhhCounterReport />
                         </div>
@@ -93,32 +91,6 @@ function AhhCounterPageContent() {
 }
 
 export default function AhhCounterPage() {
-  const router = useRouter();
-  const { session, isLoading } = useAuth();
-
-  useEffect(() => {
-    if (!isLoading && !session) {
-      console.log('Not authenticated, redirecting to login...');
-      router.push('/auth/login?redirectedFrom=/ahh-counter');
-    }
-  }, [session, isLoading, router]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl">Redirecting to login...</div>
-      </div>
-    );
-  }
-
   return (
     <AhhCounterProvider>
       <AhhCounterPageContent />
