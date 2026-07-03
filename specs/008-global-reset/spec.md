@@ -1,6 +1,6 @@
 # Feature Specification: Global Reset
 
-**Feature Branch**: `007-global-reset`
+**Feature Branch**: `008-global-reset`
 **Created**: 2026-07-03
 **Status**: Draft
 **Input**: User description: "A global 'reset all' button that nukes all the data across all tabs once a user clicks through a secondary 'confirm' button, pop up or whatever is the best practice."
@@ -13,7 +13,7 @@ As a meeting host, after a meeting ends I want to clear all recorded data across
 
 **Why this priority**: This is the entire feature. Today each module must be cleared separately (and some, like the Timer log, only via per-entry deletes), which is tedious between meetings.
 
-**Independent Test**: Populate data in Timer, Ahh Counter, and Grammarian; trigger the global reset; confirm; verify every module shows its empty state.
+**Independent Test**: Populate data in Timer, Ahh Counter, Grammarian, and Topics Master; trigger the global reset; confirm; verify every module shows its empty state.
 
 **Acceptance Scenarios**:
 
@@ -35,15 +35,15 @@ As a meeting host, after a meeting ends I want to clear all recorded data across
 
 - **FR-001**: The system MUST provide a globally accessible "Reset All" control reachable from any page (e.g., in the navigation bar or a menu within it).
 - **FR-002**: Activating the control MUST present a secondary confirmation step (an in-app modal dialog is preferred over the browser-native `confirm()` for styling and accessibility) before any data is deleted. The confirm action MUST be visually distinct as destructive, and Cancel MUST be the default/safe action.
-- **FR-003**: The confirmation MUST state that the action is irreversible and enumerate the scope: Timer logged sessions, Ahh Counter session (speakers and filler-word log), Grammarian session (speakers, Word of the Day, all observations), and processed Agenda results.
-- **FR-004**: On confirm, the system MUST delete all module data, covering both persisted browser storage (`timer-logged-times`, `ahh-counter-session`, `grammarian-session`, and any keys added by future modules) and in-memory provider state (e.g., agenda results, running timer, selected speakers/presets).
+- **FR-003**: The confirmation MUST state that the action is irreversible and enumerate the scope: Timer logged sessions, Ahh Counter session (speakers and filler-word log), Grammarian session (speakers, Word of the Day, all observations), Table Topics Master session (theme, topics, speaker log), and processed Agenda results.
+- **FR-004**: On confirm, the system MUST delete all module data, covering both persisted browser storage (`timer-logged-times`, `ahh-counter-session`, `grammarian-session`, `topics-master-session`, and any keys added by future modules) and in-memory provider state (e.g., agenda results, running timer, selected speakers/presets).
 - **FR-005**: All module UIs MUST reflect the cleared state immediately, with no manual refresh required.
 - **FR-006**: The reset MUST NOT affect authentication state, user account data, or app settings unrelated to meeting data.
 - **FR-007**: Future modules that persist meeting data MUST be included in the global reset (implementation should make the set of clearable stores easy to extend, e.g., a shared registry of storage keys/reset hooks).
 
 ### Key Entities
 
-No new entities. This feature operates on existing session data owned by the Timer, Ahh Counter, Grammarian, and Agenda modules.
+No new entities. This feature operates on existing session data owned by the Timer, Ahh Counter, Grammarian, Table Topics Master, and Agenda modules.
 
 ## Success Criteria *(mandatory)*
 

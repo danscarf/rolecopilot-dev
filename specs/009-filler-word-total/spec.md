@@ -1,6 +1,6 @@
 # Feature Specification: Ahh Counter Cumulative Filler-Word Total
 
-**Feature Branch**: `008-filler-word-total`
+**Feature Branch**: `009-filler-word-total`
 **Created**: 2026-07-03
 **Status**: Draft
 **Input**: User description: "Add to the ahh counter feature a cumulative count of all the filler words that continuously updates, allowing the ahh counter to report on the total count of all the filler words for the meeting. The counter's values should be reduced when a row is deleted, and of course reset when the global reset happens."
@@ -54,7 +54,7 @@ As the Ah-Counter, I want to delete a specific logged entry (not just the most r
 ### Edge Cases
 
 - The total MUST be derived from the log entries (a computed sum), never stored as an independent counter — this makes drift between the total and the entries impossible.
-- Global reset ([007-global-reset](../007-global-reset/spec.md)) clears the session; the total MUST return to 0.
+- Global reset ([008-global-reset](../008-global-reset/spec.md)) clears the session; the total MUST return to 0.
 - Speakers with zero entries appear in the report with zero counts (existing behavior) and contribute nothing to the total.
 - Rapid logging (multiple taps per second) MUST NOT produce a total that disagrees with the entry count.
 
@@ -67,7 +67,7 @@ As the Ah-Counter, I want to delete a specific logged entry (not just the most r
 - **FR-003**: The report MUST include the meeting-wide grand total and per-filler-word totals across all speakers, in addition to the existing per-speaker rows.
 - **FR-004**: Removing any entry — via the existing "undo last" or via per-entry deletion — MUST reduce the affected speaker's counts and the meeting total accordingly.
 - **FR-005**: The system MUST provide a way to delete an individual logged entry (e.g., a recent-entries list with a per-entry delete control, mirroring the Timer report pattern).
-- **FR-006**: The total and all counts MUST reset to zero when the session data is cleared (session reset or global reset per spec 007).
+- **FR-006**: The total and all counts MUST reset to zero when the session data is cleared (session reset or global reset per spec 008).
 
 ### Key Entities
 

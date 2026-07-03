@@ -1,6 +1,6 @@
 # Feature Specification: Practice Mode
 
-**Feature Branch**: `009-practice-mode`
+**Feature Branch**: `010-practice-mode`
 **Created**: 2026-07-03
 **Status**: Draft
 **Input**: User description: "Add a 'practice mode' that people can use to practice their speaking. When in practice mode, a user practices a speech, and their performance is analyzed and scored after they're done. This will require AI credits, so the feature must be behind a sign-up/login session. Additional use case (VP of Public Relations): conduct short mock interviews at job fairs (one or two questions), analyze the candidate through the lens of the Toastmasters meeting roles (Ah-Counter, Grammarian, Timer), give them a report, and use it as a soft recruiting pitch — 'come join a meeting as a guest and see if it fits.'"
@@ -77,8 +77,8 @@ As the VP of Public Relations at a job fair, I want a short mock-interview flow 
 - Noisy environments (job fairs!): results should carry a confidence caveat when transcription quality is poor.
 - Non-English speech: out of scope for v1; the UI should state English-only.
 - Privacy: audio is processed for analysis only and MUST NOT be retained after results are returned; the UI states this. In interview mode, the operator MUST be prompted to obtain the candidate's consent before recording (the candidate is a third party — consistent with the club's PII posture from spec 001).
-- Local/dev anonymous auth: the analysis endpoints spend real credits and MUST validate a real authenticated session server-side — client-side route guards alone are insufficient (unlike the current pages, where gating is client-side only).
-- Global reset ([007-global-reset](../007-global-reset/spec.md)): clears any locally stored practice results.
+- Auth reintroduction: the app currently has **no** login requirement on any page (removed in PR #8; localStorage-only). This feature's login requirement therefore means re-introducing authentication for Practice Mode specifically (Supabase auth from spec 003 still exists in the codebase). The analysis endpoints spend real credits and MUST validate a real authenticated session server-side — client-side route guards alone are insufficient.
+- Global reset ([008-global-reset](../008-global-reset/spec.md)): clears any locally stored practice results.
 
 ## Requirements *(mandatory)*
 
