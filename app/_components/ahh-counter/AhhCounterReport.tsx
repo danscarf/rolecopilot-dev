@@ -1,45 +1,29 @@
-// app/_components/ahh-counter/AhhCounterReport.tsx
 'use client';
 
 import React from 'react';
-import { useAhhCounter, Speaker } from '../../_providers/AhhCounterProvider';
+import { useAhhCounter } from '../../_providers/AhhCounterProvider';
+import { useMeeting } from '../../_providers/MeetingProvider';
 
 export function AhhCounterReport() {
   const { session } = useAhhCounter();
+  const { people } = useMeeting();
 
-  /**
-   * Processes the log entries to calculate the total count of each filler word for each speaker.
-   * @returns A nested object where the outer key is the speaker's name,
-   * and the inner key is the filler word, with the value being the count.
-   * e.g., { "John Doe": { "Ah": 3, "Um": 2 } }
-   */
+  const fillerWords = ["Ah", "Um", "Er", "Uh", "Well", "So", "Like", "But", "And", "You know", "Okay", "Repeats"];
+
   const calculateReport = () => {
     const report: Record<string, Record<string, number>> = {};
-
-    for (const speaker of session.speakers) {
-      report[speaker.name] = {};
+    for (const person of people) {
+      report[person.name] = {};
     }
-
     for (const entry of session.logEntries) {
-      const speakerName = entry.speaker.name;
-      const fillerWord = entry.fillerWord;
-
-      if (!report[speakerName]) {
-        report[speakerName] = {};
-      }
-
-      if (!report[speakerName][fillerWord]) {
-        report[speakerName][fillerWord] = 0;
-      }
-
-      report[speakerName][fillerWord]++;
+      const name = entry.speaker.name;
+      if (!report[name]) report[name] = {};
+      report[name][entry.fillerWord] = (report[name][entry.fillerWord] ?? 0) + 1;
     }
-
     return report;
   };
 
   const reportData = calculateReport();
-  const fillerWords = ["Ah", "Um", "Er", "Well", "So", "Like", "But", "Repeats", "Other"];
 
   return (
     <div className="p-4 border rounded-lg bg-white dark:bg-gray-800 shadow-lg mt-4">

@@ -1,10 +1,9 @@
-// app/_providers/GrammarianProvider.tsx
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import type { Speaker } from './AhhCounterProvider';
+import { useMeeting, type Person } from './MeetingProvider';
 
-export type { Speaker };
+export type { Person };
 
 export interface WordOfTheDay {
   word: string;
@@ -14,7 +13,7 @@ export interface WordOfTheDay {
 
 export interface ImproperUsageEntry {
   id: string;
-  speaker: Speaker;
+  speaker: Person;
   improperUse: string;
   suggestion: string;
   timestamp: Date;
@@ -22,21 +21,20 @@ export interface ImproperUsageEntry {
 
 export interface OutstandingLanguageEntry {
   id: string;
-  speaker: Speaker;
+  speaker: Person;
   phrase: string;
   timestamp: Date;
 }
 
 export interface WotdUsageEntry {
   id: string;
-  speaker: Speaker;
+  speaker: Person;
   usedAt: Date;
 }
 
 export interface GrammarianSession {
   date: Date;
   wordOfTheDay: WordOfTheDay;
-  speakers: Speaker[];
   improperUsages: ImproperUsageEntry[];
   outstandingLanguage: OutstandingLanguageEntry[];
   wotdUsages: WotdUsageEntry[];
@@ -44,13 +42,12 @@ export interface GrammarianSession {
 
 interface GrammarianContextType {
   session: GrammarianSession;
-  selectedSpeaker: Speaker | null;
-  addSpeaker: (name: string) => void;
-  selectSpeaker: (speaker: Speaker | null) => void;
+  selectedSpeaker: Person | null;
+  selectSpeaker: (speaker: Person | null) => void;
   setWordOfTheDay: (wotd: WordOfTheDay) => void;
-  logImproperUsage: (speaker: Speaker, improperUse: string, suggestion: string) => void;
-  logOutstandingLanguage: (speaker: Speaker, phrase: string) => void;
-  logWotdUsage: (speaker: Speaker) => void;
+  logImproperUsage: (speaker: Person, improperUse: string, suggestion: string) => void;
+  logOutstandingLanguage: (speaker: Person, phrase: string) => void;
+  logWotdUsage: (speaker: Person) => void;
   removeImproperUsage: (id: string) => void;
   removeOutstandingLanguage: (id: string) => void;
   removeWotdUsage: (id: string) => void;
@@ -65,13 +62,14 @@ const STORAGE_KEY = 'grammarian-session';
 const emptySession = (): GrammarianSession => ({
   date: new Date(),
   wordOfTheDay: { word: '', meaning: '', example: '' },
-  speakers: [],
   improperUsages: [],
   outstandingLanguage: [],
   wotdUsages: [],
 });
 
 export const GrammarianProvider = ({ children }: { children: ReactNode }) => {
+  const { registerReset } = useMeeting();
+
   const [session, setSession] = useState<GrammarianSession>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -94,24 +92,27 @@ export const GrammarianProvider = ({ children }: { children: ReactNode }) => {
     return emptySession();
   });
 
-  const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
+  const [selectedSpeaker, setSelectedSpeaker] = useState<Person | null>(null);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
   }, [session]);
 
-  const addSpeaker = (name: string) => {
-    const newSpeaker: Speaker = { id: crypto.randomUUID(), name };
-    setSession(prev => ({ ...prev, speakers: [...prev.speakers, newSpeaker] }));
-  };
+  useEffect(() => {
+    return registerReset(() => {
+      setSession(emptySession());
+      setSelectedSpeaker(null);
+      localStorage.removeItem(STORAGE_KEY);
+    });
+  }, [registerReset]);
 
-  const selectSpeaker = (speaker: Speaker | null) => setSelectedSpeaker(speaker);
+  const selectSpeaker = (speaker: Person | null) => setSelectedSpeaker(speaker);
 
   const setWordOfTheDay = (wotd: WordOfTheDay) => {
     setSession(prev => ({ ...prev, wordOfTheDay: wotd }));
   };
 
-  const logImproperUsage = (speaker: Speaker, improperUse: string, suggestion: string) => {
+  const logImproperUsage = (speaker: Person, improperUse: string, suggestion: string) => {
     const entry: ImproperUsageEntry = {
       id: crypto.randomUUID(),
       speaker,
@@ -122,7 +123,7 @@ export const GrammarianProvider = ({ children }: { children: ReactNode }) => {
     setSession(prev => ({ ...prev, improperUsages: [...prev.improperUsages, entry] }));
   };
 
-  const logOutstandingLanguage = (speaker: Speaker, phrase: string) => {
+  const logOutstandingLanguage = (speaker: Person, phrase: string) => {
     const entry: OutstandingLanguageEntry = {
       id: crypto.randomUUID(),
       speaker,
@@ -132,8 +133,7 @@ export const GrammarianProvider = ({ children }: { children: ReactNode }) => {
     setSession(prev => ({ ...prev, outstandingLanguage: [...prev.outstandingLanguage, entry] }));
   };
 
-  const logWotdUsage = (speaker: Speaker) => {
-    // If speaker already recorded, no-op — usage is a boolean per speaker.
+  const logWotdUsage = (speaker: Person) => {
     setSession(prev => {
       if (prev.wotdUsages.some(u => u.speaker.id === speaker.id)) return prev;
       const entry: WotdUsageEntry = { id: crypto.randomUUID(), speaker, usedAt: new Date() };
@@ -153,7 +153,6 @@ export const GrammarianProvider = ({ children }: { children: ReactNode }) => {
     setSession(prev => ({ ...prev, wotdUsages: prev.wotdUsages.filter(e => e.id !== id) }));
   };
 
-  // Remove the most recently added observation across all three lists.
   const undoLastObservation = () => {
     setSession(prev => {
       const candidates: Array<{ list: 'improper' | 'outstanding' | 'wotd'; id: string; time: number }> = [];
@@ -167,12 +166,9 @@ export const GrammarianProvider = ({ children }: { children: ReactNode }) => {
       if (candidates.length === 0) return prev;
       const target = candidates.reduce((a, b) => (b.time > a.time ? b : a));
       switch (target.list) {
-        case 'improper':
-          return { ...prev, improperUsages: prev.improperUsages.filter(e => e.id !== target.id) };
-        case 'outstanding':
-          return { ...prev, outstandingLanguage: prev.outstandingLanguage.filter(e => e.id !== target.id) };
-        case 'wotd':
-          return { ...prev, wotdUsages: prev.wotdUsages.filter(e => e.id !== target.id) };
+        case 'improper': return { ...prev, improperUsages: prev.improperUsages.filter(e => e.id !== target.id) };
+        case 'outstanding': return { ...prev, outstandingLanguage: prev.outstandingLanguage.filter(e => e.id !== target.id) };
+        case 'wotd': return { ...prev, wotdUsages: prev.wotdUsages.filter(e => e.id !== target.id) };
       }
     });
   };
@@ -180,12 +176,12 @@ export const GrammarianProvider = ({ children }: { children: ReactNode }) => {
   const resetSession = () => {
     setSelectedSpeaker(null);
     setSession(emptySession());
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   const value: GrammarianContextType = {
     session,
     selectedSpeaker,
-    addSpeaker,
     selectSpeaker,
     setWordOfTheDay,
     logImproperUsage,
@@ -203,8 +199,6 @@ export const GrammarianProvider = ({ children }: { children: ReactNode }) => {
 
 export const useGrammarian = () => {
   const context = useContext(GrammarianContext);
-  if (context === undefined) {
-    throw new Error('useGrammarian must be used within a GrammarianProvider');
-  }
+  if (!context) throw new Error('useGrammarian must be used within a GrammarianProvider');
   return context;
 };
