@@ -7,7 +7,7 @@ import { useMeeting } from '../../_providers/MeetingProvider';
 const SEGMENTS: MeetingSegment[] = ['Speech', 'Table Topics', 'Evaluation'];
 
 export function AhhCounterControls() {
-  const { selectedSpeaker, selectedSegment, setSelectedSegment, words, logWord, addCustomWord, undoLastLog, selectSpeaker } = useAhhCounter();
+  const { session, selectedSpeaker, selectedSegment, setSelectedSegment, words, logWord, addCustomWord, undoLastLog, selectSpeaker } = useAhhCounter();
   const { addPerson } = useMeeting();
   const [customWord, setCustomWord] = useState('');
   const [ttName, setTtName] = useState('');
@@ -100,7 +100,7 @@ export function AhhCounterControls() {
         />
         <button
           onClick={handleAddCustom}
-          disabled={!customWord.trim()}
+          disabled={!customWord.trim() || !selectedSpeaker}
           className="px-4 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Count it
@@ -109,7 +109,8 @@ export function AhhCounterControls() {
 
       <button
         onClick={undoLastLog}
-        className="p-2 bg-red-600 text-white rounded-full w-full hover:bg-red-700 transition-colors"
+        disabled={!session.logEntries.length}
+        className="p-2 bg-red-600 text-white rounded-full w-full hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Undo Last
       </button>

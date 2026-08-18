@@ -47,7 +47,7 @@ export function Navbar() {
           {navLink('/topics-master', '🎯 Topics Master', 'bg-emerald-600 shadow-emerald-500/50')}
           <button
             onClick={handleEndMeeting}
-            onBlur={() => setShowConfirm(false)}
+            onBlur={() => setTimeout(() => setShowConfirm(false), 150)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
               showConfirm
                 ? 'bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-500/30'

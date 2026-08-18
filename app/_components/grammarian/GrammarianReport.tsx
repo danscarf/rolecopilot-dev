@@ -105,7 +105,7 @@ export function GrammarianReport() {
           </h3>
           <div className="space-y-3">
             {improperBySpeaker.map((group) => (
-              <div key={group.name} className="p-3 rounded-xl bg-red-50 dark:bg-red-900/20">
+              <div key={group.id} className="p-3 rounded-xl bg-red-50 dark:bg-red-900/20">
                 <p className="font-semibold text-gray-900 dark:text-gray-100">{group.name}</p>
                 <ul className="mt-1 space-y-1 text-sm">
                   {group.items.map((entry: ImproperUsageEntry) => (
@@ -130,7 +130,7 @@ export function GrammarianReport() {
           </h3>
           <div className="space-y-3">
             {outstandingBySpeaker.map((group) => (
-              <div key={group.name} className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20">
+              <div key={group.id} className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20">
                 <p className="font-semibold text-gray-900 dark:text-gray-100">{group.name}</p>
                 <ul className="mt-1 space-y-1 text-sm">
                   {group.items.map((entry: OutstandingLanguageEntry) => (

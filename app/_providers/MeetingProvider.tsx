@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback, ReactNode } from 'react';
 
 export type Segment = 'Speech' | 'Evaluation';
 
@@ -29,7 +29,10 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        try { return JSON.parse(saved); } catch {}
+        try {
+            const parsed: Person[] = JSON.parse(saved);
+            return parsed.map(p => ({ ...p, segments: p.segments ?? [] }));
+          } catch {}
       }
     }
     return [];
@@ -62,10 +65,10 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
     ));
   };
 
-  const registerReset = (fn: () => void): (() => void) => {
+  const registerReset = useCallback((fn: () => void): (() => void) => {
     resets.current.push(fn);
     return () => { resets.current = resets.current.filter(f => f !== fn); };
-  };
+  }, []);
 
   const resetMeeting = () => {
     setPeople([]);
