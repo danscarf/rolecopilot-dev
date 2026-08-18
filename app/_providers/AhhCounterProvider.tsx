@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useMeeting, type Person } from './MeetingProvider';
 
 export type { Person };
@@ -19,15 +19,19 @@ export interface AhhCounterSession {
 
 interface AhhCounterContextType {
   session: AhhCounterSession;
+  words: string[];
   selectedSpeaker: Person | null;
   selectSpeaker: (speaker: Person | null) => void;
   logFillerWord: (speaker: Person, fillerWord: string) => void;
+  addCustomWord: (word: string) => void;
   undoLastLog: () => void;
 }
 
 const AhhCounterContext = createContext<AhhCounterContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'ahh-counter-session';
+
+const DEFAULT_WORDS = ["Ah", "Um", "Er", "Uh", "Well", "So", "Like", "But", "And", "You know", "Okay", "Repeats"];
 
 export const AhhCounterProvider = ({ children }: { children: ReactNode }) => {
   const { registerReset } = useMeeting();
@@ -53,6 +57,7 @@ export const AhhCounterProvider = ({ children }: { children: ReactNode }) => {
     return { date: new Date(), logEntries: [] };
   });
 
+  const [words, setWords] = useState<string[]>(DEFAULT_WORDS);
   const [selectedSpeaker, setSelectedSpeaker] = useState<Person | null>(null);
 
   useEffect(() => {
@@ -63,6 +68,7 @@ export const AhhCounterProvider = ({ children }: { children: ReactNode }) => {
     return registerReset(() => {
       setSession({ date: new Date(), logEntries: [] });
       setSelectedSpeaker(null);
+      setWords(DEFAULT_WORDS);
       localStorage.removeItem(STORAGE_KEY);
     });
   }, [registerReset]);
@@ -79,12 +85,26 @@ export const AhhCounterProvider = ({ children }: { children: ReactNode }) => {
     setSession(prev => ({ ...prev, logEntries: [...prev.logEntries, entry] }));
   };
 
+  const addCustomWord = (word: string) => {
+    const trimmed = word.trim();
+    if (!trimmed) return;
+    const lower = trimmed.toLowerCase();
+    const isNew = !words.some(w => w.toLowerCase() === lower);
+    if (isNew) {
+      setWords(prev => [...prev, trimmed]);
+    }
+    if (selectedSpeaker) {
+      const resolvedWord = isNew ? trimmed : words.find(w => w.toLowerCase() === lower)!;
+      logFillerWord(selectedSpeaker, resolvedWord);
+    }
+  };
+
   const undoLastLog = () => {
     setSession(prev => ({ ...prev, logEntries: prev.logEntries.slice(0, -1) }));
   };
 
   return (
-    <AhhCounterContext.Provider value={{ session, selectedSpeaker, selectSpeaker, logFillerWord, undoLastLog }}>
+    <AhhCounterContext.Provider value={{ session, words, selectedSpeaker, selectSpeaker, logFillerWord, addCustomWord, undoLastLog }}>
       {children}
     </AhhCounterContext.Provider>
   );
