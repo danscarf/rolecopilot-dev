@@ -1,11 +1,12 @@
-// app/_components/grammarian/WordOfTheDay.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
 import { useGrammarian } from '../../_providers/GrammarianProvider';
+import { useMeeting } from '../../_providers/MeetingProvider';
 
 export function WordOfTheDay() {
   const { session, setWordOfTheDay, logWotdUsage, removeWotdUsage } = useGrammarian();
+  const { people } = useMeeting();
   const wotd = session.wordOfTheDay;
   const isSet = wotd.word.trim().length > 0;
 
@@ -29,13 +30,13 @@ export function WordOfTheDay() {
     if (word.trim()) setIsEditing(false);
   };
 
-  const toggleUsage = (speakerId: string) => {
-    const existing = session.wotdUsages.find((u) => u.speaker.id === speakerId);
+  const toggleUsage = (personId: string) => {
+    const existing = session.wotdUsages.find((u) => u.speaker.id === personId);
     if (existing) {
       removeWotdUsage(existing.id);
     } else {
-      const speaker = session.speakers.find((s) => s.id === speakerId);
-      if (speaker) logWotdUsage(speaker);
+      const person = people.find((p) => p.id === personId);
+      if (person) logWotdUsage(person);
     }
   };
 
@@ -123,25 +124,25 @@ export function WordOfTheDay() {
           <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Who used the Word of the Day?
           </p>
-          {session.speakers.length === 0 ? (
+          {people.length === 0 ? (
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Add speakers to track WOTD usage.
             </p>
           ) : (
             <ul className="space-y-1">
-              {session.speakers.map((s) => {
-                const used = usageBySpeaker.has(s.id);
+              {people.map((p) => {
+                const used = usageBySpeaker.has(p.id);
                 return (
-                  <li key={s.id}>
+                  <li key={p.id}>
                     <button
-                      onClick={() => toggleUsage(s.id)}
+                      onClick={() => toggleUsage(p.id)}
                       className={`w-full flex items-center justify-between p-2 rounded-lg text-sm transition-colors ${
                         used
                           ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200'
                           : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                       }`}
                     >
-                      <span className="font-medium">{s.name}</span>
+                      <span className="font-medium">{p.name}</span>
                       <span className="text-xs">{used ? '✓ Used' : 'Mark used'}</span>
                     </button>
                   </li>
