@@ -1,17 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useAhhCounter } from '../../_providers/AhhCounterProvider';
+import { useAhhCounter, type MeetingSegment } from '../../_providers/AhhCounterProvider';
+import { useMeeting } from '../../_providers/MeetingProvider';
+
+const SEGMENTS: MeetingSegment[] = ['Speech', 'Table Topics', 'Evaluation'];
 
 export function AhhCounterControls() {
-  const { selectedSpeaker, words, logFillerWord, addCustomWord, undoLastLog } = useAhhCounter();
+  const { selectedSpeaker, selectedSegment, setSelectedSegment, words, logWord, addCustomWord, undoLastLog } = useAhhCounter();
+  const { addPerson } = useMeeting();
   const [customWord, setCustomWord] = useState('');
-
-  const handleLog = (word: string) => {
-    if (selectedSpeaker) {
-      logFillerWord(selectedSpeaker, word);
-    }
-  };
+  const [ttName, setTtName] = useState('');
 
   const handleAddCustom = () => {
     const trimmed = customWord.trim();
@@ -21,16 +20,34 @@ export function AhhCounterControls() {
   };
 
   return (
-    <div className="p-4 border rounded-lg bg-white dark:bg-gray-800 shadow-lg">
-      <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
         Controls for {selectedSpeaker ? selectedSpeaker.name : '…'}
       </h2>
 
-      <div className="grid grid-cols-3 gap-2 mt-4">
+      {/* Segment tabs */}
+      <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-700 rounded-full w-fit">
+        {SEGMENTS.map(seg => (
+          <button
+            key={seg}
+            onClick={() => setSelectedSegment(seg)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              selectedSegment === seg
+                ? 'bg-purple-600 text-white shadow'
+                : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+            }`}
+          >
+            {seg}
+          </button>
+        ))}
+      </div>
+
+      {/* Filler word grid */}
+      <div className="grid grid-cols-3 gap-2">
         {words.map(word => (
           <button
             key={word}
-            onClick={() => handleLog(word)}
+            onClick={() => logWord(word)}
             disabled={!selectedSpeaker}
             className="p-4 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-purple-100 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 dark:text-gray-100 text-sm font-medium"
           >
@@ -39,7 +56,8 @@ export function AhhCounterControls() {
         ))}
       </div>
 
-      <div className="flex gap-2 mt-4">
+      {/* Custom word */}
+      <div className="flex gap-2">
         <input
           type="text"
           value={customWord}
@@ -59,7 +77,7 @@ export function AhhCounterControls() {
 
       <button
         onClick={undoLastLog}
-        className="mt-4 p-2 bg-red-600 text-white rounded-full w-full hover:bg-red-700 transition-colors"
+        className="p-2 bg-red-600 text-white rounded-full w-full hover:bg-red-700 transition-colors"
       >
         Undo Last
       </button>

@@ -5,25 +5,30 @@ import { useMeeting, type Person } from './MeetingProvider';
 
 export type { Person };
 
-export interface AhCounterLogEntry {
+export type MeetingSegment = 'Speech' | 'Table Topics' | 'Evaluation';
+
+export interface LogEntry {
   id: string;
-  speaker: Person;
-  fillerWord: string;
-  timestamp: Date;
+  personId: string;
+  personName: string;
+  segment: MeetingSegment;
+  word: string;
 }
 
 export interface AhhCounterSession {
   date: Date;
-  logEntries: AhCounterLogEntry[];
+  logEntries: LogEntry[];
 }
 
 interface AhhCounterContextType {
   session: AhhCounterSession;
   words: string[];
   selectedSpeaker: Person | null;
+  selectedSegment: MeetingSegment;
   selectSpeaker: (speaker: Person | null) => void;
-  logFillerWord: (speaker: Person, fillerWord: string) => void;
+  setSelectedSegment: (segment: MeetingSegment) => void;
   addCustomWord: (word: string) => void;
+  logWord: (word: string) => void;
   undoLastLog: () => void;
 }
 
@@ -45,8 +50,11 @@ export const AhhCounterProvider = ({ children }: { children: ReactNode }) => {
           return {
             date: new Date(parsed.date),
             logEntries: (parsed.logEntries ?? []).map((e: any) => ({
-              ...e,
-              timestamp: new Date(e.timestamp),
+              id: e.id,
+              personId: e.personId,
+              personName: e.personName,
+              segment: e.segment ?? 'Speech',
+              word: e.word,
             })),
           };
         } catch (e) {
@@ -59,6 +67,7 @@ export const AhhCounterProvider = ({ children }: { children: ReactNode }) => {
 
   const [words, setWords] = useState<string[]>(DEFAULT_WORDS);
   const [selectedSpeaker, setSelectedSpeaker] = useState<Person | null>(null);
+  const [selectedSegment, setSelectedSegment] = useState<MeetingSegment>('Speech');
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
@@ -69,18 +78,21 @@ export const AhhCounterProvider = ({ children }: { children: ReactNode }) => {
       setSession({ date: new Date(), logEntries: [] });
       setSelectedSpeaker(null);
       setWords(DEFAULT_WORDS);
+      setSelectedSegment('Speech');
       localStorage.removeItem(STORAGE_KEY);
     });
   }, [registerReset]);
 
   const selectSpeaker = (speaker: Person | null) => setSelectedSpeaker(speaker);
 
-  const logFillerWord = (speaker: Person, fillerWord: string) => {
-    const entry: AhCounterLogEntry = {
+  const logWord = (word: string) => {
+    if (!selectedSpeaker) return;
+    const entry: LogEntry = {
       id: crypto.randomUUID(),
-      speaker,
-      fillerWord,
-      timestamp: new Date(),
+      personId: selectedSpeaker.id,
+      personName: selectedSpeaker.name,
+      segment: selectedSegment,
+      word,
     };
     setSession(prev => ({ ...prev, logEntries: [...prev.logEntries, entry] }));
   };
@@ -93,10 +105,8 @@ export const AhhCounterProvider = ({ children }: { children: ReactNode }) => {
     if (isNew) {
       setWords(prev => [...prev, trimmed]);
     }
-    if (selectedSpeaker) {
-      const resolvedWord = isNew ? trimmed : words.find(w => w.toLowerCase() === lower)!;
-      logFillerWord(selectedSpeaker, resolvedWord);
-    }
+    const resolvedWord = isNew ? trimmed : words.find(w => w.toLowerCase() === lower)!;
+    logWord(resolvedWord);
   };
 
   const undoLastLog = () => {
@@ -104,7 +114,7 @@ export const AhhCounterProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AhhCounterContext.Provider value={{ session, words, selectedSpeaker, selectSpeaker, logFillerWord, addCustomWord, undoLastLog }}>
+    <AhhCounterContext.Provider value={{ session, words, selectedSpeaker, selectedSegment, selectSpeaker, setSelectedSegment, addCustomWord, logWord, undoLastLog }}>
       {children}
     </AhhCounterContext.Provider>
   );
