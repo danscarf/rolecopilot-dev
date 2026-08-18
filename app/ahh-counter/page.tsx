@@ -12,7 +12,9 @@ function AhhCounterPageContent() {
   const { session, selectedSpeaker, selectSpeaker } = useAhhCounter();
 
   const tableTopicsPersonIds = new Set(
-    session.logEntries.map((e) => e.speaker.id)
+    session.logEntries
+      .filter(e => e.segment === 'Table Topics')
+      .map(e => e.personId)
   );
 
   return (

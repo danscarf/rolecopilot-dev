@@ -7,7 +7,7 @@ import { useMeeting } from '../../_providers/MeetingProvider';
 const SEGMENTS: MeetingSegment[] = ['Speech', 'Table Topics', 'Evaluation'];
 
 export function AhhCounterControls() {
-  const { selectedSpeaker, selectedSegment, setSelectedSegment, words, logWord, addCustomWord, undoLastLog } = useAhhCounter();
+  const { selectedSpeaker, selectedSegment, setSelectedSegment, words, logWord, addCustomWord, undoLastLog, selectSpeaker } = useAhhCounter();
   const { addPerson } = useMeeting();
   const [customWord, setCustomWord] = useState('');
   const [ttName, setTtName] = useState('');
@@ -17,6 +17,14 @@ export function AhhCounterControls() {
     if (!trimmed) return;
     addCustomWord(trimmed);
     setCustomWord('');
+  };
+
+  const handleAddTableTopicsSpeaker = () => {
+    const trimmed = ttName.trim();
+    if (!trimmed) return;
+    const person = addPerson(trimmed, 'Table Topics speaker');
+    selectSpeaker(person);
+    setTtName('');
   };
 
   return (
@@ -41,6 +49,30 @@ export function AhhCounterControls() {
           </button>
         ))}
       </div>
+
+      {/* Table Topics quick-add */}
+      {selectedSegment === 'Table Topics' && (
+        <div className="flex gap-2 items-center p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-700">
+          <span className="text-sm text-amber-800 dark:text-amber-300 whitespace-nowrap font-medium">Called on just now?</span>
+          <input
+            type="text"
+            value={ttName}
+            onChange={(e) => setTtName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleAddTableTopicsSpeaker();
+            }}
+            placeholder="Speaker name…"
+            className="flex-grow p-1.5 border rounded-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-amber-400 px-3 text-sm"
+          />
+          <button
+            onClick={handleAddTableTopicsSpeaker}
+            disabled={!ttName.trim()}
+            className="px-3 py-1.5 bg-amber-500 text-white rounded-full hover:bg-amber-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+          >
+            Start counting
+          </button>
+        </div>
+      )}
 
       {/* Filler word grid */}
       <div className="grid grid-cols-3 gap-2">
