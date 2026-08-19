@@ -23,3 +23,16 @@ body {
 .gradient-success {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
+
+/* RoleCopilot design tokens
+   Accent: purple-600 / purple-700
+   Danger: red-600 / red-700
+   Corner radius scale: rounded-full (pills/chips/inputs), rounded-xl (list items, small cards), rounded-2xl (panels/cards)
+*/
+:root {
+  --rc-accent: #9333ea;
+  --rc-accent-hover: #7e22ce;
+  --rc-accent-soft: #f3e8ff;
+  --rc-danger: #dc2626;
+  --rc-danger-hover: #b91c1c;
+}
