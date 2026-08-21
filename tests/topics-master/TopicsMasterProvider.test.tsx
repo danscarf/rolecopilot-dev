@@ -163,6 +163,116 @@ describe('TopicsMasterProvider', () => {
     expect(result.current.session.log[0].topic.id).toBe(result.current.session.log[1].topic.id);
   });
 
+  it('should add generated topics with metadata', () => {
+    const { result } = renderHook(() => useTopicsMaster(), {
+      wrapper: TopicsMasterProvider,
+    });
+
+    act(() => {
+      result.current.addGeneratedTopics(['Question one?', '  Question two?  ', '   '], 'hard');
+    });
+
+    expect(result.current.session.topics.length).toBe(2);
+    expect(result.current.session.topics[0]).toMatchObject({
+      text: 'Question one?',
+      source: 'generated',
+      difficulty: 'hard',
+    });
+    expect(result.current.session.topics[1].text).toBe('Question two?');
+  });
+
+  it('should mark a generated topic as edited on inline edit, but not a manual one', () => {
+    const { result } = renderHook(() => useTopicsMaster(), {
+      wrapper: TopicsMasterProvider,
+    });
+
+    act(() => {
+      result.current.addTopic('Manual topic');
+      result.current.addGeneratedTopics(['Generated topic?'], 'easy');
+    });
+
+    const [manual, generated] = result.current.session.topics;
+
+    act(() => {
+      result.current.updateTopicText(manual.id, 'Manual topic (edited)');
+      result.current.updateTopicText(generated.id, 'Generated topic (edited)?');
+    });
+
+    expect(result.current.session.topics[0].text).toBe('Manual topic (edited)');
+    expect(result.current.session.topics[0].edited).toBeUndefined();
+    expect(result.current.session.topics[1].text).toBe('Generated topic (edited)?');
+    expect(result.current.session.topics[1].edited).toBe(true);
+  });
+
+  it('should not update a topic to empty text', () => {
+    const { result } = renderHook(() => useTopicsMaster(), {
+      wrapper: TopicsMasterProvider,
+    });
+
+    act(() => {
+      result.current.addTopic('Keep me');
+    });
+
+    act(() => {
+      result.current.updateTopicText(result.current.session.topics[0].id, '   ');
+    });
+
+    expect(result.current.session.topics[0].text).toBe('Keep me');
+  });
+
+  it('should replace only the targeted topic text and clear the edited flag on regeneration', () => {
+    const { result } = renderHook(() => useTopicsMaster(), {
+      wrapper: TopicsMasterProvider,
+    });
+
+    act(() => {
+      result.current.addGeneratedTopics(['First?', 'Second?', 'Third?'], 'easy');
+    });
+
+    const second = result.current.session.topics[1];
+
+    act(() => {
+      result.current.updateTopicText(second.id, 'Second, edited?');
+    });
+
+    act(() => {
+      result.current.replaceTopicText(second.id, 'A fresh replacement?');
+    });
+
+    expect(result.current.session.topics.map(t => t.text)).toEqual([
+      'First?',
+      'A fresh replacement?',
+      'Third?',
+    ]);
+    expect(result.current.session.topics[1].edited).toBe(false);
+    expect(result.current.session.topics[1].id).toBe(second.id);
+  });
+
+  it('should remove only unused topics, keeping ones assigned in the log', () => {
+    const { result } = renderHook(() => useTopicsMaster(), {
+      wrapper: TopicsMasterProvider,
+    });
+
+    act(() => {
+      result.current.addTopic('Used topic');
+      result.current.addTopic('Unused topic');
+    });
+
+    const used = result.current.session.topics[0];
+
+    act(() => {
+      result.current.logSpeaker('Alice', used);
+    });
+
+    act(() => {
+      result.current.removeUnusedTopics();
+    });
+
+    expect(result.current.session.topics.length).toBe(1);
+    expect(result.current.session.topics[0].text).toBe('Used topic');
+    expect(result.current.session.log.length).toBe(1);
+  });
+
   it('should reset the session', () => {
     const { result } = renderHook(() => useTopicsMaster(), {
       wrapper: TopicsMasterProvider,
