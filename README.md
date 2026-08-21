@@ -2,7 +2,17 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+Copy `.env.example` to `.env.local` and fill in the values:
+
+```bash
+cp .env.example .env.local
+```
+
+`NEXT_PUBLIC_SUPABASE_*` powers sign-in. `GEMINI_API_KEY` is server-only and
+powers the Table Topics question generator — without it, generation returns a
+"not configured" error. The same variables must be set in the Vercel project.
+
+Then, run the development server:
 
 ```bash
 npm run dev

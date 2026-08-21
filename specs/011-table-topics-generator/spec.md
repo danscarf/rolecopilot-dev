@@ -2,7 +2,7 @@
 
 **Feature Branch**: `011-table-topics-generator`
 **Created**: 2026-07-03
-**Status**: Draft
+**Status**: Implemented
 **Input**: User description: "Enhance the table topics module to auto-generate table topics based on the word of the day and the meeting theme. There should be a choice as to whether to generate easy questions or hard questions, and there should also be a way to regenerate an already generated question in case I don't like the one that was auto generated."
 
 **Scope note**: This enhances the existing Table Topics Master module (`app/topics-master`, spec [007-table-topics-master](../007-table-topics-master/spec.md)), which already provides a session theme, a manually managed topic list, and a speaker log. The generator adds AI-generated topics into that same topic list, so generated questions flow through the existing assign-to-speaker/log workflow unchanged.
@@ -61,7 +61,7 @@ As the Table Topics Master, I want generated questions to behave exactly like ma
 - AI generation failure: show a clear error and allow retry; an individual regeneration failure MUST NOT disturb the rest of the set.
 - Content safety: generated questions MUST be club-appropriate, respectful, and internationally friendly (aligned with Toastmasters voice/tone); no politics-baiting, offensive, or overly personal prompts.
 - Rapid repeated regeneration: debounce/disable the control while a request is in flight to avoid duplicate spend.
-- This feature consumes AI credits: like Practice Mode ([010-practice-mode](../010-practice-mode/spec.md)), it requires login, and generation endpoints MUST validate the session server-side. (Note: main currently has no auth requirement on any page — see merged PR #8 — so the auth story for AI features needs to be settled before implementation.)
+- This feature consumes AI credits: like Practice Mode ([010-practice-mode](../010-practice-mode/spec.md)), it requires login, and generation endpoints MUST validate the session server-side. **Resolved:** the Topics Master page itself stays open (consistent with PR #8), but generation is gated — `/generate-topics` verifies a real Supabase access token server-side and the Generate/Regenerate controls are disabled with a sign-in prompt when the visitor is not signed in.
 - Global reset ([008-global-reset](../008-global-reset/spec.md)): clears the Topics Master session including generated questions.
 - Changing difficulty or theme after generating does not silently regenerate — the user explicitly clicks Generate (which appends or replaces per an explicit choice, with a confirm before discarding unused questions).
 
@@ -76,7 +76,7 @@ As the Table Topics Master, I want generated questions to behave exactly like ma
 - **FR-005**: Difficulty definitions: Easy = concrete, personal-experience prompts accessible to new members and guests; Hard = abstract, hypothetical, or position-defending prompts for experienced members.
 - **FR-006**: Users MUST be able to edit any generated question inline.
 - **FR-007**: Generated questions MUST work with the module's existing speaker log (assign a speaker to a question); questions with a log entry are visually marked as used.
-- **FR-008**: The generation endpoint MUST validate an authenticated session server-side (AI credits are spent server-side), consistent with the access policy adopted for Practice Mode (spec 010).
+- **FR-008**: The generation endpoint MUST validate an authenticated session server-side (AI credits are spent server-side), consistent with the access policy adopted for Practice Mode (spec 010). Because the browser client keeps its session in `localStorage` rather than cookies, the client sends the Supabase access token as an `Authorization: Bearer` header and the route verifies it via `supabase.auth.getUser(token)`; unauthenticated calls receive 401. `SupabaseAuthProvider` seeds a mock session so pages stay open, so UI gating reads the real session directly rather than that provider.
 - **FR-009**: Generated questions (including edits and used state) MUST persist within the existing `topics-master-session` storage and MUST be cleared by the module's session reset and the global reset (spec 008).
 
 ### Key Entities

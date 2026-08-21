@@ -36,7 +36,7 @@ export function TopicsLog() {
           <select
             value={selectedTopicId}
             onChange={e => setSelectedTopicId(e.target.value)}
-            className="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="flex-1 min-w-0 max-w-full truncate px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             <option value="">Select topic…</option>
             {session.topics.map(t => (
@@ -66,7 +66,7 @@ export function TopicsLog() {
               key={entry.id}
               className="flex items-start justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl"
             >
-              <div>
+              <div className="min-w-0 break-words">
                 <span className="font-mono text-xs text-gray-400 mr-2">{idx + 1}.</span>
                 <span className="font-semibold text-gray-900 dark:text-gray-100">{entry.speakerName}</span>
                 <span className="mx-2 text-gray-400">→</span>
